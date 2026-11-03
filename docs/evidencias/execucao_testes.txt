@@ -1,0 +1,30 @@
+test_laboratorio_e_equipamento (test_labagenda.TestAdmin.test_laboratorio_e_equipamento) ... ok
+test_ocorrencia (test_labagenda.TestAdmin.test_ocorrencia) ... ok
+test_relatorio (test_labagenda.TestAdmin.test_relatorio) ... ok
+test_acesso_sem_login_redireciona (test_labagenda.TestHTTP.test_acesso_sem_login_redireciona) ... ok
+test_conflito_mostra_mensagem (test_labagenda.TestHTTP.test_conflito_mostra_mensagem) ... ok
+test_fluxo_completo (test_labagenda.TestHTTP.test_fluxo_completo) ... ok
+test_login_errado_401 (test_labagenda.TestHTTP.test_login_errado_401) ... ok
+test_post_sem_csrf_rejeitado (test_labagenda.TestHTTP.test_post_sem_csrf_rejeitado) ... ok
+test_xss_escapado (test_labagenda.TestHTTP.test_xss_escapado) ... ok
+test_aprovar_recusar (test_labagenda.TestReservas.test_aprovar_recusar) ... ok
+test_cancelamento (test_labagenda.TestReservas.test_cancelamento) ... ok
+test_conflito_de_horario (test_labagenda.TestReservas.test_conflito_de_horario) ... ok
+test_data_passada (test_labagenda.TestReservas.test_data_passada) ... ok
+test_equipamentos (test_labagenda.TestReservas.test_equipamentos) ... ok
+test_falha_em_equipamento_nao_deixa_reserva_pela_metade (test_labagenda.TestReservas.test_falha_em_equipamento_nao_deixa_reserva_pela_metade) ... ok
+test_horarios_invalidos (test_labagenda.TestReservas.test_horarios_invalidos) ... ok
+test_horarios_ocupados (test_labagenda.TestReservas.test_horarios_ocupados) ... ok
+test_laboratorio_desativado (test_labagenda.TestReservas.test_laboratorio_desativado) ... ok
+test_limite_exato_de_4h_e_horarios_de_borda (test_labagenda.TestReservas.test_limite_exato_de_4h_e_horarios_de_borda) ... ok
+test_reserva_cancelada_ou_recusada_libera_horario (test_labagenda.TestReservas.test_reserva_cancelada_ou_recusada_libera_horario) ... ok
+test_reserva_valida_nasce_pendente (test_labagenda.TestReservas.test_reserva_valida_nasce_pendente) ... ok
+test_cadastro_nao_permite_virar_tecnico (test_labagenda.TestUsuarios.test_cadastro_nao_permite_virar_tecnico) ... ok
+test_cadastro_ok_e_hash (test_labagenda.TestUsuarios.test_cadastro_ok_e_hash) ... ok
+test_login (test_labagenda.TestUsuarios.test_login) ... ok
+test_validacoes (test_labagenda.TestUsuarios.test_validacoes) ... ok
+
+----------------------------------------------------------------------
+Ran 25 tests in 8.389s
+
+OK

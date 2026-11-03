@@ -1,0 +1,17 @@
+flowchart LR
+  U([Usuário]) -- "pode ser" --> AL[Aluno]
+  U -- "pode ser" --> PR[Professor]
+  U -- "pode ser" --> TE[Técnico]
+  AL -- "solicita" --> R[[Reserva]]
+  PR -- "solicita" --> R
+  R -- "ocorre em um" --> L[Laboratório]
+  L -- "possui" --> E[Equipamento]
+  R -- "pode utilizar" --> E
+  TE -- "aprova ou recusa" --> R
+  TE -- "cadastra e mantém" --> L
+  TE -- "cadastra e mantém" --> E
+  TE -- "registra" --> O[Ocorrência]
+  R -- "pode gerar" --> O
+  R -- "tem" --> S{{Situação:<br/>pendente, aprovada,<br/>recusada, cancelada}}
+  TE -- "consulta" --> REL[Relatório de uso]
+  R -- "alimenta" --> REL

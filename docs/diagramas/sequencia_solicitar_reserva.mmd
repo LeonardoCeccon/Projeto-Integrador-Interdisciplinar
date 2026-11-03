@@ -1,0 +1,34 @@
+sequenceDiagram
+  autonumber
+  actor U as Aluno/Professor
+  participant UI as Interface web
+  participant C as Controlador (routes)
+  participant S as Serviço de reservas
+  participant DB as MySQL
+  U->>UI: escolhe laboratório e data
+  UI->>C: GET /reservas/nova?lab&data
+  C->>S: horarios_ocupados(lab, data)
+  S->>DB: SELECT reservas PENDENTE/APROVADA
+  DB-->>S: faixas ocupadas
+  S-->>UI: quadro de horários ocupados
+  U->>UI: informa horário, finalidade e equipamentos
+  UI->>C: POST /reservas/nova (+ token CSRF)
+  C->>S: criar_reserva(...)
+  S->>S: valida data futura, 4h máx., 07h–22h
+  alt dados inválidos
+    S-->>C: RegraDeNegocio (E07..E10)
+    C-->>UI: mensagem de erro (400)
+  else dados válidos
+    S->>DB: SELECT ... FOR UPDATE (trava o laboratório)
+    S->>DB: busca conflito de horário
+    alt há conflito (E11/E12)
+      S->>DB: ROLLBACK
+      S-->>C: RegraDeNegocio
+      C-->>UI: mensagem de erro (400)
+    else livre
+      S->>DB: INSERT reserva (PENDENTE) + reserva_equipamento
+      S->>DB: COMMIT
+      S-->>C: id da reserva
+      C-->>UI: redireciona com mensagem S02
+    end
+  end

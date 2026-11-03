@@ -1,0 +1,25 @@
+flowchart TD
+  ini([Início]) --> a1[Entrar no sistema]
+  a1 --> d1{Credenciais<br/>válidas?}
+  d1 -- não --> e1[/Mensagem E02/] --> a1
+  d1 -- sim --> a2[Escolher laboratório e data]
+  a2 --> a3[Ver horários ocupados]
+  a3 --> a4[Informar horário, finalidade<br/>e equipamentos]
+  a4 --> d2{Data futura, até 4 h,<br/>entre 07h e 22h?}
+  d2 -- não --> e2[/Mensagens E07 a E10/] --> a4
+  d2 -- sim --> d3{Laboratório e<br/>equipamentos livres?}
+  d3 -- não --> e3[/Mensagens E11 ou E12/] --> a4
+  d3 -- sim --> a5[Gravar reserva PENDENTE]
+  a5 --> a6[Técnico analisa a solicitação]
+  a6 --> d4{Aprovar?}
+  d4 -- sim --> a7[Reserva APROVADA]
+  d4 -- não --> a8[Informar motivo<br/>e marcar RECUSADA]
+  a7 --> d5{Usuário cancela<br/>antes do início?}
+  d5 -- sim --> a9[Reserva CANCELADA]
+  d5 -- não --> a10[Uso do laboratório]
+  a10 --> d6{Houve problema?}
+  d6 -- sim --> a11[Técnico registra ocorrência]
+  d6 -- não --> fim([Fim])
+  a11 --> fim
+  a8 --> fim
+  a9 --> fim

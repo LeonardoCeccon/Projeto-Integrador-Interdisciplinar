@@ -1,0 +1,4 @@
+flowchart LR
+  N[Navegador<br/>HTML/CSS] -- HTTPS --> G[Gunicorn + Flask<br/>camada web e serviços]
+  G -- "PyMySQL<br/>(usuário com mínimo privilégio)" --> M[(MySQL 8<br/>banco labagenda)]
+  GIT[(Repositório Git)] -. deploy .-> G

@@ -1,0 +1,26 @@
+sequenceDiagram
+  autonumber
+  actor T as Técnico
+  participant UI as Painel do técnico
+  participant C as Controlador
+  participant S as Serviço de reservas
+  participant DB as MySQL
+  T->>UI: abre o painel
+  UI->>C: GET /painel
+  C->>S: listar_reservas(status=PENDENTE)
+  S->>DB: SELECT
+  DB-->>UI: lista de pendentes
+  T->>UI: clica em Aprovar ou Recusar (com motivo)
+  UI->>C: POST /reservas/{id}/decidir
+  C->>C: confere perfil TECNICO (RN01)
+  C->>S: decidir_reserva(id, avaliador, aprovar, motivo)
+  S->>DB: SELECT reserva
+  alt reserva não está PENDENTE
+    S-->>UI: erro E15
+  else recusa sem motivo
+    S-->>UI: erro E14
+  else decisão válida
+    S->>DB: UPDATE status, id_avaliador, motivo_recusa
+    S->>DB: COMMIT
+    S-->>UI: mensagem S03 ou S04
+  end

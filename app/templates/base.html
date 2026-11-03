@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block titulo %}LabAgenda{% endblock %} · LabAgenda</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="top">
+  <span class="logo">LabAgenda</span>
+  {% if usuario_atual %}
+  <nav aria-label="Principal" style="display:contents">
+    <a href="{{ url_for('main.painel') }}">Início</a>
+    {% if usuario_atual.perfil != 'TECNICO' %}<a href="{{ url_for('main.nova_reserva') }}">Nova reserva</a>{% endif %}
+    <a href="{{ url_for('main.laboratorios') }}">Laboratórios</a>
+    {% if usuario_atual.perfil == 'TECNICO' %}
+      <a href="{{ url_for('main.equipamentos') }}">Equipamentos</a>
+      <a href="{{ url_for('main.ocorrencias') }}">Ocorrências</a>
+      <a href="{{ url_for('main.relatorio') }}">Relatório</a>
+    {% endif %}
+  </nav>
+  <span>{{ usuario_atual.nome }} ({{ usuario_atual.perfil|lower }})</span>
+  <form method="post" action="{{ url_for('main.sair') }}" class="inline">
+    <input type="hidden" name="csrf" value="{{ csrf_token }}"><button class="link" type="submit">Sair</button>
+  </form>
+  {% endif %}
+</header>
+<main>
+  {% with mensagens = get_flashed_messages(with_categories=true) %}
+    {% for cat, texto in mensagens %}<div class="msg {{ cat }}" role="{{ 'alert' if cat == 'erro' else 'status' }}">{{ texto }}</div>{% endfor %}
+  {% endwith %}
+  {% block conteudo %}{% endblock %}
+</main>
+</body></html>

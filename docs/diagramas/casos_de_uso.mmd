@@ -1,0 +1,26 @@
+flowchart LR
+  AL([Aluno]):::ator
+  PR([Professor]):::ator
+  S([Solicitante]):::ator
+  T([Técnico]):::ator
+  AL -- "é um" --> S
+  PR -- "é um" --> S
+  subgraph SIS[Sistema LabAgenda]
+    UC1((UC01 Criar conta))
+    UC2((UC02 Autenticar))
+    UC3((UC03 Consultar<br/>disponibilidade))
+    UC4((UC04 Solicitar<br/>reserva))
+    UC5((UC05 Cancelar<br/>reserva))
+    UC6((UC06 Acompanhar<br/>minhas reservas))
+    UC7((UC07 Avaliar<br/>reserva))
+    UC8((UC08 Gerir<br/>laboratórios))
+    UC9((UC09 Gerir<br/>equipamentos))
+    UC10((UC10 Registrar<br/>ocorrência))
+    UC11((UC11 Emitir relatório<br/>de uso))
+  end
+  S --- UC1 & UC3 & UC4 & UC5 & UC6
+  T --- UC7 & UC8 & UC9 & UC10 & UC11
+  UC4 -. "«include»" .-> UC3
+  UC4 -. "«include»" .-> UC2
+  UC7 -. "«include»" .-> UC2
+  classDef ator fill:#fff,stroke:#0f5c4d,stroke-width:2px,color:#0f5c4d

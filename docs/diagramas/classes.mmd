@@ -1,0 +1,75 @@
+classDiagram
+  direction LR
+  class Usuario {
+    -int idUsuario
+    -String nome
+    -String email
+    -String senhaHash
+    -Perfil perfil
+    -boolean ativo
+    +autenticar(senha) boolean
+    +podeAvaliar() boolean
+  }
+  class Laboratorio {
+    -int idLaboratorio
+    -String nome
+    -String localizacao
+    -int capacidade
+    -boolean ativo
+    +estaLivre(data, inicio, fim) boolean
+  }
+  class Equipamento {
+    -int idEquipamento
+    -String nome
+    -String numeroPatrimonio
+    -StatusEquipamento status
+    +estaDisponivel() boolean
+  }
+  class Reserva {
+    -int idReserva
+    -Date dataReserva
+    -Time horaInicio
+    -Time horaFim
+    -String finalidade
+    -StatusReserva status
+    -String motivoRecusa
+    -DateTime criadaEm
+    +aprovar(avaliador)
+    +recusar(avaliador, motivo)
+    +cancelar(usuario)
+    +duracao() Duration
+  }
+  class Ocorrencia {
+    -int idOcorrencia
+    -String descricao
+    -DateTime registradaEm
+  }
+  class Perfil {
+    <<enumeration>>
+    ALUNO
+    PROFESSOR
+    TECNICO
+  }
+  class StatusReserva {
+    <<enumeration>>
+    PENDENTE
+    APROVADA
+    RECUSADA
+    CANCELADA
+  }
+  class StatusEquipamento {
+    <<enumeration>>
+    DISPONIVEL
+    MANUTENCAO
+    BAIXADO
+  }
+  Usuario "1" --> "0..*" Reserva : solicita
+  Usuario "0..1" <-- "0..*" Reserva : avaliada por
+  Laboratorio "1" --> "0..*" Reserva : recebe
+  Laboratorio "1" *-- "0..*" Equipamento : possui
+  Reserva "0..*" -- "0..*" Equipamento : utiliza
+  Reserva "1" *-- "0..*" Ocorrencia : gera
+  Ocorrencia "0..*" --> "0..1" Equipamento : refere-se a
+  Usuario --> Perfil
+  Reserva --> StatusReserva
+  Equipamento --> StatusEquipamento

@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% block titulo %}Minhas reservas{% endblock %}
+{% block conteudo %}
+<h1>Minhas reservas</h1>
+<p><a class="btn" href="{{ url_for('main.nova_reserva') }}">+ Nova reserva</a></p>
+<div class="card">
+{% if reservas %}
+<table>
+<thead><tr><th>Data</th><th>Horário</th><th>Laboratório</th><th>Situação</th><th>Detalhes</th><th></th></tr></thead>
+<tbody>
+{% for r in reservas %}
+<tr>
+  <td data-l="Data">{{ r.data_reserva[8:10] }}/{{ r.data_reserva[5:7] }}/{{ r.data_reserva[:4] }}</td>
+  <td data-l="Horário">{{ r.hora_inicio[:5] }}–{{ r.hora_fim[:5] }}</td>
+  <td data-l="Laboratório">{{ r.laboratorio }}</td>
+  <td data-l="Situação"><span class="tag {{ r.status }}">{{ r.status|capitalize }}</span></td>
+  <td data-l="Detalhes">{{ r.finalidade }}{% if r.equipamentos %}<br><span class="hint">Equipamentos: {{ r.equipamentos }}</span>{% endif %}
+    {% if r.motivo_recusa %}<br><span class="hint">Motivo da recusa: {{ r.motivo_recusa }}</span>{% endif %}</td>
+  <td>{% if r.pode_cancelar %}
+    <form method="post" action="{{ url_for('main.cancelar', id_reserva=r.id_reserva) }}" class="inline">
+      <input type="hidden" name="csrf" value="{{ csrf_token }}"><button class="btn small danger" type="submit">Cancelar</button></form>{% endif %}</td>
+</tr>
+{% endfor %}
+</tbody></table>
+{% else %}<p class="vazio">Você ainda não fez nenhuma reserva.</p>{% endif %}
+</div>
+{% endblock %}

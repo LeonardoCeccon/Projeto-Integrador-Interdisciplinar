@@ -1,0 +1,41 @@
+{% extends "base.html" %}{% block titulo %}Nova reserva{% endblock %}
+{% block conteudo %}
+<h1>Nova reserva</h1>
+<div class="card">
+<form method="get" action="{{ url_for('main.nova_reserva') }}" class="row" aria-label="Consultar disponibilidade">
+  <div><label for="lab">Laboratório</label>
+    <select id="lab" name="id_laboratorio" required>
+      <option value="">Selecione…</option>
+      {% for l in labs %}<option value="{{ l.id_laboratorio }}" {{ 'selected' if f.get('id_laboratorio')|string == l.id_laboratorio|string }}>{{ l.nome }} ({{ l.capacidade }} lugares)</option>{% endfor %}
+    </select></div>
+  <div><label for="dt">Data</label><input id="dt" name="data" type="date" value="{{ f.get('data','') }}" required></div>
+  <div style="align-self:end"><button class="btn sec" type="submit" style="margin:0">Ver horários ocupados</button></div>
+</form>
+{% if f.get('id_laboratorio') and f.get('data') %}
+  {% if ocupados %}
+  <div class="msg aviso" style="margin-top:1rem">Horários já reservados nesta data:
+    {% for o in ocupados %}<strong>{{ o.hora_inicio[:5] }}–{{ o.hora_fim[:5] }}</strong> ({{ o.status|lower }}){{ ', ' if not loop.last }}{% endfor %}.</div>
+  {% else %}<div class="msg ok" style="margin-top:1rem">Nenhum horário reservado nesta data. Tudo livre!</div>{% endif %}
+{% endif %}
+</div>
+<div class="card">
+<form method="post" novalidate>
+  <input type="hidden" name="csrf" value="{{ csrf_token }}">
+  <input type="hidden" name="id_laboratorio" value="{{ f.get('id_laboratorio','') }}">
+  <input type="hidden" name="data" value="{{ f.get('data','') }}">
+  <p class="hint">Laboratório e data vêm da consulta acima. Funcionamento: 07:00 às 22:00; máximo de 4 horas por reserva.</p>
+  <div class="row">
+    <div><label for="hi">Início</label><input id="hi" name="hora_inicio" type="time" value="{{ f.get('hora_inicio','') }}" required></div>
+    <div><label for="hf">Término</label><input id="hf" name="hora_fim" type="time" value="{{ f.get('hora_fim','') }}" required></div>
+  </div>
+  <label for="fin">Finalidade da reserva</label>
+  <input id="fin" name="finalidade" maxlength="200" value="{{ f.get('finalidade','') }}" placeholder="Ex.: Aula prática de roteamento" required>
+  {% if equips %}
+  <fieldset class="checks" style="border:0;padding:0;margin:.8rem 0 0"><legend style="font-weight:600">Equipamentos (opcional)</legend>
+    {% for e in equips %}<label><input type="checkbox" name="equipamentos" value="{{ e.id_equipamento }}"> {{ e.nome }} <span class="hint">({{ e.numero_patrimonio }})</span></label>{% endfor %}
+  </fieldset>{% endif %}
+  <button class="btn" type="submit">Enviar solicitação</button>
+  <a class="btn sec" href="{{ url_for('main.painel') }}">Cancelar</a>
+</form>
+</div>
+{% endblock %}

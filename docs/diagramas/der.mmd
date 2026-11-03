@@ -1,0 +1,56 @@
+erDiagram
+  USUARIO ||--o{ RESERVA : solicita
+  USUARIO |o--o{ RESERVA : avalia
+  LABORATORIO ||--o{ RESERVA : recebe
+  LABORATORIO ||--o{ EQUIPAMENTO : possui
+  RESERVA ||--o{ RESERVA_EQUIPAMENTO : inclui
+  EQUIPAMENTO ||--o{ RESERVA_EQUIPAMENTO : "é usado em"
+  RESERVA ||--o{ OCORRENCIA : gera
+  EQUIPAMENTO |o--o{ OCORRENCIA : "é citado em"
+  USUARIO {
+    int id_usuario PK
+    varchar nome
+    varchar email UK
+    varchar senha_hash
+    enum perfil
+    tinyint ativo
+    datetime criado_em
+  }
+  LABORATORIO {
+    int id_laboratorio PK
+    varchar nome UK
+    varchar localizacao
+    smallint capacidade
+    tinyint ativo
+  }
+  EQUIPAMENTO {
+    int id_equipamento PK
+    int id_laboratorio FK
+    varchar nome
+    varchar numero_patrimonio UK
+    enum status
+  }
+  RESERVA {
+    int id_reserva PK
+    int id_usuario FK
+    int id_laboratorio FK
+    int id_avaliador FK
+    date data_reserva
+    time hora_inicio
+    time hora_fim
+    varchar finalidade
+    enum status
+    varchar motivo_recusa
+    datetime criada_em
+  }
+  RESERVA_EQUIPAMENTO {
+    int id_reserva PK,FK
+    int id_equipamento PK,FK
+  }
+  OCORRENCIA {
+    int id_ocorrencia PK
+    int id_reserva FK
+    int id_equipamento FK
+    varchar descricao
+    datetime registrada_em
+  }

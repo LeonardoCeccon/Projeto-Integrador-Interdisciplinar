@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block titulo %}Relatório de uso{% endblock %}
+{% block conteudo %}
+<h1>Relatório de uso dos laboratórios</h1>
+<div class="card"><form method="get" class="row">
+<div><label for="i">De</label><input id="i" type="date" name="inicio" value="{{ ini }}"></div>
+<div><label for="f">Até</label><input id="f" type="date" name="fim" value="{{ fim }}"></div>
+<div style="align-self:end"><button class="btn" style="margin:0" type="submit">Gerar</button></div></form></div>
+<div class="card">{% if linhas %}<table><thead><tr><th>Laboratório</th><th>Reservas aprovadas</th><th>Horas de uso</th></tr></thead><tbody>
+{% for l in linhas %}<tr><td data-l="Laboratório">{{ l.laboratorio }}</td><td data-l="Reservas">{{ l.reservas }}</td><td data-l="Horas">{{ '%.1f'|format(l.horas) }}</td></tr>{% endfor %}
+</tbody></table>{% else %}<p class="vazio">Sem reservas aprovadas no período.</p>{% endif %}</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+stateDiagram-v2
+  [*] --> PENDENTE: solicitar (valida RN02–RN06)
+  PENDENTE --> APROVADA: técnico aprova
+  PENDENTE --> RECUSADA: técnico recusa (com motivo)
+  PENDENTE --> CANCELADA: dono cancela antes do início
+  APROVADA --> CANCELADA: dono cancela antes do início
+  RECUSADA --> [*]
+  CANCELADA --> [*]
+  APROVADA --> [*]: data/horário concluídos

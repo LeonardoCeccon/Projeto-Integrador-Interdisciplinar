@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% block titulo %}Laboratórios{% endblock %}
+{% block conteudo %}
+<h1>Laboratórios</h1>
+<div class="card">
+<table>
+<thead><tr><th>Nome</th><th>Localização</th><th>Capacidade</th><th>Situação</th>{% if usuario_atual.perfil == 'TECNICO' %}<th>Editar</th>{% endif %}</tr></thead>
+<tbody>{% for l in labs %}
+<tr><td data-l="Nome">{{ l.nome }}</td><td data-l="Localização">{{ l.localizacao }}</td><td data-l="Capacidade">{{ l.capacidade }}</td>
+<td data-l="Situação"><span class="tag {{ 'DISPONIVEL' if l.ativo else 'CANCELADA' }}">{{ 'Ativo' if l.ativo else 'Desativado' }}</span></td>
+{% if usuario_atual.perfil == 'TECNICO' %}<td>
+<form method="post" class="row" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr));align-items:end">
+ <input type="hidden" name="csrf" value="{{ csrf_token }}"><input type="hidden" name="id_laboratorio" value="{{ l.id_laboratorio }}">
+ <input name="nome" value="{{ l.nome }}" aria-label="Nome" required><input name="localizacao" value="{{ l.localizacao }}" aria-label="Localização" required>
+ <input name="capacidade" type="number" min="1" value="{{ l.capacidade }}" aria-label="Capacidade" required>
+ <select name="ativo" aria-label="Situação"><option value="1" {{ 'selected' if l.ativo }}>Ativo</option><option value="0" {{ 'selected' if not l.ativo }}>Desativado</option></select>
+ <button class="btn small" type="submit">Salvar</button></form></td>{% endif %}
+</tr>{% endfor %}</tbody></table>
+</div>
+{% if usuario_atual.perfil == 'TECNICO' %}
+<div class="card"><h2>Cadastrar laboratório</h2>
+<form method="post"><input type="hidden" name="csrf" value="{{ csrf_token }}">
+<div class="row"><div><label for="n">Nome</label><input id="n" name="nome" maxlength="80" required></div>
+<div><label for="lo">Localização</label><input id="lo" name="localizacao" maxlength="120" required></div>
+<div><label for="c">Capacidade</label><input id="c" name="capacidade" type="number" min="1" required></div></div>
+<input type="hidden" name="ativo" value="1"><button class="btn" type="submit">Cadastrar</button></form></div>
+{% endif %}
+{% endblock %}
