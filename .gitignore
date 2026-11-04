@@ -4,3 +4,6 @@ __pycache__/
 *.sqlite3
 .venv/
 docs/img/_tmp*
+
+docs/09-roteiros-de-video.md
+entrega/
