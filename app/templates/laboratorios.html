@@ -1,6 +1,7 @@
 {% extends "base.html" %}{% block titulo %}Laboratórios{% endblock %}
 {% block conteudo %}
 <h1>Laboratórios</h1>
+<p class="hint">Laboratórios desativados não aparecem na tela de nova reserva e não aceitam pedidos.</p>
 <div class="card">
 <table>
 <thead><tr><th>Nome</th><th>Localização</th><th>Capacidade</th><th>Situação</th>{% if usuario_atual.perfil == 'TECNICO' %}<th>Editar</th>{% endif %}</tr></thead>

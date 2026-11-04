@@ -5,7 +5,7 @@ import re
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from . import db
-from .messages import MSG
+from .messages import CAMPO_POR_CODIGO, MSG
 
 ABERTURA = dt.time(7, 0)
 FECHAMENTO = dt.time(22, 0)
@@ -16,9 +16,12 @@ EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 class RegraDeNegocio(Exception):
     """Erro previsto, com mensagem pronta para exibir ao usuário."""
 
-    def __init__(self, codigo, **kw):
+    def __init__(self, codigo, erros=None, **kw):
         self.codigo = codigo
-        super().__init__(MSG[codigo].format(**kw))
+        texto = MSG[codigo].format(**kw)
+        # erros: {campo: texto} exibido junto de cada campo com problema (v2.0)
+        self.erros = erros or ({CAMPO_POR_CODIGO[codigo]: texto} if codigo in CAMPO_POR_CODIGO else {})
+        super().__init__(texto)
 
 
 def agora():
@@ -28,12 +31,21 @@ def agora():
 # ---------------------------------------------------------------- usuários
 def criar_usuario(nome, email, senha, perfil="ALUNO"):
     nome, email = (nome or "").strip(), (email or "").strip().lower()
-    if not nome or not email or not senha:
-        raise RegraDeNegocio("E05")
-    if not EMAIL_RE.match(email):
-        raise RegraDeNegocio("E06")
-    if len(senha) < 8 or not re.search(r"[A-Za-z]", senha) or not re.search(r"\d", senha):
-        raise RegraDeNegocio("E04")
+    erros = {}
+    if not nome:
+        erros["nome"] = "Informe seu nome completo."
+    if not email:
+        erros["email"] = "Informe o e-mail."
+    elif not EMAIL_RE.match(email):
+        erros["email"] = MSG["E06"]
+    if not senha:
+        erros["senha"] = "Informe uma senha."
+    elif len(senha) < 8 or not re.search(r"[A-Za-z]", senha) or not re.search(r"\d", senha):
+        erros["senha"] = MSG["E04"]
+    if erros:
+        if not nome or not email or not senha:
+            raise RegraDeNegocio("E05", erros=erros)
+        raise RegraDeNegocio("E06" if "email" in erros else "E04", erros=erros)
     if perfil not in ("ALUNO", "PROFESSOR"):  # técnico só entra via carga inicial
         perfil = "ALUNO"
     if db.one("SELECT 1 AS x FROM usuario WHERE email = ?", (email,)):
@@ -45,13 +57,33 @@ def criar_usuario(nome, email, senha, perfil="ALUNO"):
     return novo
 
 
+_FALHAS = {}                       # e-mail -> instantes das tentativas erradas (memória do processo)
+LIMITE_TENTATIVAS = 5
+JANELA = dt.timedelta(minutes=10)
+
+
+def _falhas_recentes(chave):
+    limite = agora() - JANELA
+    _FALHAS[chave] = [t for t in _FALHAS.get(chave, []) if t > limite]
+    return _FALHAS[chave]
+
+
 def autenticar(email, senha):
-    if not email or not senha:
-        raise RegraDeNegocio("E01")
-    u = db.one("SELECT * FROM usuario WHERE email = ? AND ativo = 1",
-               (email.strip().lower(),))
+    erros = {}
+    if not (email or "").strip():
+        erros["email"] = "Informe o e-mail."
+    if not senha:
+        erros["senha"] = "Informe a senha."
+    if erros:
+        raise RegraDeNegocio("E01", erros=erros)
+    chave = email.strip().lower()
+    if len(_falhas_recentes(chave)) >= LIMITE_TENTATIVAS:          # P03
+        raise RegraDeNegocio("E25", min=int(JANELA.total_seconds() // 60))
+    u = db.one("SELECT * FROM usuario WHERE email = ? AND ativo = 1", (chave,))
     if not u or not check_password_hash(u["senha_hash"], senha):
+        _FALHAS[chave].append(agora())
         raise RegraDeNegocio("E02")  # mesma mensagem: não revela se o e-mail existe
+    _FALHAS.pop(chave, None)
     return u
 
 
@@ -148,8 +180,19 @@ def horarios_ocupados(id_laboratorio, data):
 
 
 def criar_reserva(id_usuario, id_laboratorio, data, inicio, fim, finalidade, ids_equipamento=()):
-    if not (id_laboratorio and data and inicio and fim and (finalidade or "").strip()):
-        raise RegraDeNegocio("E05")
+    erros = {}
+    if not id_laboratorio:
+        erros["id_laboratorio"] = "Escolha o laboratório na consulta acima."
+    if not data:
+        erros["data"] = "Escolha a data na consulta acima."
+    if not inicio:
+        erros["hora_inicio"] = "Informe o horário de início."
+    if not fim:
+        erros["hora_fim"] = "Informe o horário de término."
+    if not (finalidade or "").strip():
+        erros["finalidade"] = "Informe a finalidade da reserva."
+    if erros:
+        raise RegraDeNegocio("E05", erros=erros)
     d, hi, hf = _parse_data(data), _parse_hora(inicio), _parse_hora(fim)
     finalidade = finalidade.strip()[:200]
 
@@ -202,7 +245,8 @@ def criar_reserva(id_usuario, id_laboratorio, data, inicio, fim, finalidade, ids
             db.execute("INSERT INTO reserva_equipamento (id_reserva, id_equipamento) VALUES (?,?)",
                        (id_reserva, ide))
         db.commit()
-        return id_reserva
+        return {"id": id_reserva, "lab": lab["nome"], "data": f"{d:%d/%m/%Y}",
+                "inicio": hi.strftime("%H:%M"), "fim": hf.strftime("%H:%M")}
     except Exception:
         db.rollback()
         raise
@@ -254,6 +298,8 @@ def decidir_reserva(id_reserva, id_avaliador, aprovar, motivo=None):
         db.execute("UPDATE reserva SET status='RECUSADA', id_avaliador=?, motivo_recusa=? "
                    "WHERE id_reserva=?", (id_avaliador, motivo[:200], id_reserva))
     db.commit()
+    quem = db.one("SELECT nome FROM usuario WHERE id_usuario = ?", (r["id_usuario"],))
+    return {"id": id_reserva, "nome": quem["nome"] if quem else "?"}
 
 
 def cancelar_reserva(id_reserva, id_usuario):

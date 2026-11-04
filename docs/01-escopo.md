@@ -20,14 +20,14 @@ pedido; o sistema impede conflitos por regra, não por boa vontade.
 4. Produzir um relatório de horas de uso por laboratório para apoiar decisões de manutenção e compra.
 
 ## 1.3 Escopo
-| Dentro do escopo (versão 2.0) | Fora do escopo (backlog) |
+| Dentro do escopo (versões 1.0 e 2.0) | Fora do escopo (backlog) |
 |---|---|
 | Cadastro e login de alunos/professores | Integração com o sistema acadêmico (SSO) |
 | Consulta de horários ocupados por data | Reservas recorrentes (semanais) |
 | Solicitação, cancelamento e acompanhamento de reservas | Notificações por e-mail/SMS |
 | Aprovação/recusa com motivo pelo técnico | Aplicativo móvel nativo (a interface web já é responsiva) |
 | Cadastro de laboratórios e equipamentos, com situação | Calendário visual semanal |
-| Registro de ocorrências | Exportação do relatório em PDF/CSV |
+| Registro de ocorrências | Exportação do relatório em PDF (o CSV entrou na v2.0) |
 | Relatório de uso por período | Recuperação de senha por e-mail |
 
 ## 1.4 Partes interessadas e perfis
@@ -65,6 +65,8 @@ manter a separação clara em relação ao técnico.*
 | RNF05 | SGBD popular e de fácil manutenção | MySQL 8 com InnoDB |
 | RNF06 | Consultas de conflito rápidas | Índice composto `(id_laboratorio, data_reserva, hora_inicio)` |
 | RNF07 | Mensagens claras e consistentes | Catálogo único em `app/messages.py` |
+| RNF08 | Disponível na internet com banco gerenciado | Render (aplicação) + MySQL 8 no Aiven, conexão SSL, deploy automático pelo GitHub |
+| RNF09 | Configuração fora do código | Variáveis de ambiente (`DB_*`, `SECRET_KEY`, `SECURE_COOKIES`); credenciais nunca versionadas |
 
 ## 1.7 Regras de negócio
 | ID | Regra | Onde é garantida |
@@ -108,4 +110,7 @@ O projeto foi tratado como um ciclo PDCA. Cada achado abaixo foi **planejado, fe
 | Duas pessoas reservarem ao mesmo tempo | Média | Alto | Transação + `FOR UPDATE` + índice |
 | Técnico demorar a decidir | Alta | Médio | Painel destaca pendentes; notificações no backlog |
 | Dados de teste sendo usados em produção | Média | Alto | Senhas de demonstração documentadas como temporárias; `.env` fora do Git |
-| Perda do banco | Baixa | Alto | Rotina de `mysqldump` diário descrita em `docs/06-git-e-implantacao.md` |
+| Perda do banco | Baixa | Alto | Rotina de `mysqldump` descrita em `docs/04-dados.md` |
+| Serviço gratuito "dormir" e demorar na primeira página | Alta | Baixo | Abrir a URL antes de apresentar; plano pago em uso real |
+| Credenciais com erro de digitação ou espaços invisíveis | Média | Alto | `.strip()` no código e conferência pelo Traceback nos Logs (incidente D06) |
+| Contas de demonstração públicas | Alta | Médio | Trocar ou remover após a apresentação |

@@ -52,6 +52,7 @@ negócio (`aprovar`, `recusar`, `cancelar`, `estaLivre`) foram acrescentadas às
 ## 2.6 Arquitetura de implantação
 ![Implantação](img/uml_implantacao.png)
 
+O diagrama mostra a implantação real: navegador → **Render** (Gunicorn + Flask) → **MySQL 8 no Aiven** por SSL, com código no **GitHub** e deploy automático a cada `push`.
 A aplicação segue três camadas simples: **rotas** (`app/routes.py`, controle e perfis), **serviços**
 (`app/services.py`, regras de negócio) e **dados** (`app/db.py`, acesso ao MySQL).
 

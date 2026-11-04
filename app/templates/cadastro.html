@@ -1,15 +1,18 @@
-{% extends "base.html" %}{% block titulo %}Criar conta{% endblock %}
+{% extends "base.html" %}{% import "_campos.html" as c %}{% block titulo %}Criar conta{% endblock %}
 {% block conteudo %}
 <div class="card" style="max-width:480px;margin:1.5rem auto">
   <h1>Criar conta</h1>
   <form method="post" novalidate>
     <input type="hidden" name="csrf" value="{{ csrf_token }}">
     <label for="nome">Nome completo</label>
-    <input id="nome" name="nome" value="{{ f.get('nome','') }}" maxlength="100" required>
+    <input id="nome" name="nome" value="{{ f.get('nome','') }}" maxlength="100" required {{ c.attrs(erros,'nome') }}>
+    {{ c.erro(erros,'nome') }}
     <label for="email">E-mail institucional</label>
-    <input id="email" name="email" type="email" value="{{ f.get('email','') }}" maxlength="120" required>
+    <input id="email" name="email" type="email" value="{{ f.get('email','') }}" maxlength="120" required {{ c.attrs(erros,'email') }}>
+    {{ c.erro(erros,'email') }}
     <label for="senha">Senha <span class="hint">(mínimo de 8 caracteres, com letras e números)</span></label>
-    <input id="senha" name="senha" type="password" autocomplete="new-password" required>
+    <input id="senha" name="senha" type="password" autocomplete="new-password" required {{ c.attrs(erros,'senha') }}>
+    {{ c.erro(erros,'senha') }}
     <label for="perfil">Eu sou</label>
     <select id="perfil" name="perfil">
       <option value="ALUNO" {{ 'selected' if f.get('perfil') != 'PROFESSOR' }}>Aluno</option>

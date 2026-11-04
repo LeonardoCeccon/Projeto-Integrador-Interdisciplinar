@@ -21,6 +21,7 @@ class Base(unittest.TestCase):
         self.ctx = self.app.app_context()
         self.ctx.push()
         seed.carregar()
+        sv._FALHAS.clear()
         self.prof = db.one("SELECT * FROM usuario WHERE perfil='PROFESSOR'")["id_usuario"]
         self.tec = db.one("SELECT * FROM usuario WHERE perfil='TECNICO'")["id_usuario"]
 
@@ -30,7 +31,7 @@ class Base(unittest.TestCase):
         os.remove(self.path)
 
     def reservar(self, lab=1, data=AMANHA, i="08:00", f="10:00", eq=()):
-        return sv.criar_reserva(self.prof, lab, data, i, f, "Aula prática", eq)
+        return sv.criar_reserva(self.prof, lab, data, i, f, "Aula prática", eq)["id"]
 
     def erro(self, codigo, fn, *a, **kw):
         with self.assertRaises(RegraDeNegocio) as cm:
@@ -207,7 +208,7 @@ class TestHTTP(Base):
         rid = re.search(r"/reservas/(\d+)/decidir", pag).group(1)
         r = self.c.post(f"/reservas/{rid}/decidir", data={"csrf": self.token("/painel"), "acao": "aprovar"},
                         follow_redirects=True)
-        self.assertIn("Reserva aprovada", r.get_data(as_text=True))
+        self.assertIn("de Paulo Ribeiro aprovada", r.get_data(as_text=True))
 
     def test_conflito_mostra_mensagem(self):
         self.entrar("professor@labagenda.test", "Professor123")
@@ -224,6 +225,178 @@ class TestHTTP(Base):
                     "data": AMANHA, "hora_inicio": "08:00", "hora_fim": "09:00",
                     "finalidade": "<script>alert(1)</script>"})
         self.assertNotIn("<script>alert(1)", self.c.get("/painel").get_data(as_text=True))
+
+
+class TestFeedbackV2(Base):
+    """Cada teste nasce de um ponto levantado pelos colegas (docs/08-feedback-e-versao-2.md)."""
+
+    def setUp(self):
+        super().setUp()
+        self.c = self.app.test_client()
+
+    def token(self, url="/login"):
+        return re.search(r'name="csrf" value="([0-9a-f]+)"', self.c.get(url).get_data(as_text=True)).group(1)
+
+    def entrar(self, email, senha):
+        return self.c.post("/login", data={"csrf": self.token(), "email": email, "senha": senha})
+
+    def sair(self):
+        self.c.post("/sair", data={"csrf": self.token("/painel")})
+
+    # --- Colega 1: campos vazios, e-mail inválido, bloqueio após sair
+    def test_login_vazio_marca_os_dois_campos(self):
+        r = self.entrar("", "")
+        h = r.get_data(as_text=True)
+        self.assertEqual(r.status_code, 401)
+        self.assertIn("Informe o e-mail.", h)
+        self.assertIn("Informe a senha.", h)
+        self.assertEqual(h.count('aria-invalid="true"'), 2)
+
+    def test_cadastro_erros_ao_lado_de_cada_campo(self):
+        r = self.c.post("/cadastro", data={"csrf": self.token("/cadastro"), "nome": "", "email": "sem-arroba",
+                                           "senha": "", "perfil": "ALUNO"})
+        h = r.get_data(as_text=True)
+        self.assertIn("Informe seu nome completo.", h)
+        self.assertIn("Informe um e-mail válido", h)
+        self.assertIn("Informe uma senha.", h)
+        self.assertIn('id="erro-email"', h)
+
+    def test_email_invalido_sozinho(self):
+        with self.assertRaises(RegraDeNegocio) as cm:
+            sv.criar_usuario("Ana", "sem-arroba", "Senha1234")
+        self.assertEqual(cm.exception.codigo, "E06")
+        self.assertIn("email", cm.exception.erros)
+
+    def test_depois_de_sair_o_painel_exige_login(self):
+        self.entrar("aluno@labagenda.test", "Aluno1234")
+        self.assertEqual(self.c.get("/painel").status_code, 200)
+        self.sair()
+        r = self.c.get("/painel")
+        self.assertEqual(r.status_code, 302)
+        self.assertIn("/login", r.headers["Location"])
+
+    def test_bloqueio_apos_cinco_senhas_erradas(self):
+        for _ in range(5):
+            self.erro("E02", sv.autenticar, "aluno@labagenda.test", "errada1234")
+        self.erro("E25", sv.autenticar, "aluno@labagenda.test", "Aluno1234")  # mesmo com a senha certa
+        sv._FALHAS["aluno@labagenda.test"] = [agora_menos(11)]               # passou a janela
+        self.assertEqual(sv.autenticar("aluno@labagenda.test", "Aluno1234")["perfil"], "ALUNO")
+
+    # --- Colega 2: reservas
+    def test_mensagem_de_reserva_traz_detalhes(self):
+        self.entrar("professor@labagenda.test", "Professor123")
+        r = self.c.post("/reservas/nova", data={"csrf": self.token("/reservas/nova"), "id_laboratorio": "1",
+                        "data": AMANHA, "hora_inicio": "08:00", "hora_fim": "09:30", "finalidade": "Aula"},
+                        follow_redirects=True)
+        h = r.get_data(as_text=True)
+        self.assertIn("Laboratório de Redes", h)
+        self.assertIn("das 08:00 às 09:30", h)
+
+    def test_reserva_sem_horario_marca_campos(self):
+        self.entrar("professor@labagenda.test", "Professor123")
+        r = self.c.post("/reservas/nova", data={"csrf": self.token("/reservas/nova"), "id_laboratorio": "1",
+                        "data": AMANHA, "hora_inicio": "", "hora_fim": "", "finalidade": ""})
+        h = r.get_data(as_text=True)
+        self.assertEqual(r.status_code, 400)
+        self.assertIn("Informe o horário de início.", h)
+        self.assertIn("Informe a finalidade da reserva.", h)
+
+    def test_erro_de_conflito_aparece_no_campo_de_horario(self):
+        self.reservar(i="08:00", f="10:00")
+        self.entrar("professor@labagenda.test", "Professor123")
+        r = self.c.post("/reservas/nova", data={"csrf": self.token("/reservas/nova"), "id_laboratorio": "1",
+                        "data": AMANHA, "hora_inicio": "09:00", "hora_fim": "11:00", "finalidade": "x"})
+        self.assertIn('id="erro-hora_inicio"', r.get_data(as_text=True))
+
+    # --- Colega 3: painel do técnico
+    def test_recusa_sem_motivo_mostra_erro_na_linha_certa(self):
+        rid = self.reservar()
+        self.entrar("tecnico@labagenda.test", "Tecnico123")
+        r = self.c.post(f"/reservas/{rid}/decidir", data={"csrf": self.token("/painel"), "acao": "recusar", "motivo": ""})
+        h = r.get_data(as_text=True)
+        self.assertEqual(r.status_code, 400)
+        self.assertIn('id="erro-motivo"', h)
+        self.assertEqual(sv.listar_reservas(status="PENDENTE")[0]["id_reserva"], rid)  # continua pendente
+
+    def test_solicitante_ve_motivo_da_recusa(self):
+        rid = self.reservar()
+        self.entrar("tecnico@labagenda.test", "Tecnico123")
+        r = self.c.post(f"/reservas/{rid}/decidir", data={"csrf": self.token("/painel"), "acao": "recusar",
+                        "motivo": "Manutenção do ar-condicionado"}, follow_redirects=True)
+        self.assertIn("recusada", r.get_data(as_text=True))
+        self.sair()
+        self.entrar("professor@labagenda.test", "Professor123")
+        self.assertIn("Manutenção do ar-condicionado", self.c.get("/painel").get_data(as_text=True))
+
+    def test_aluno_nao_acessa_area_do_tecnico(self):
+        self.entrar("aluno@labagenda.test", "Aluno1234")
+        for rota in ("/relatorio", "/relatorio.csv", "/equipamentos", "/ocorrencias"):
+            r = self.c.get(rota, follow_redirects=True)
+            self.assertIn("não tem permissão", r.get_data(as_text=True), rota)
+
+    # --- Colega 4: laboratórios, ocorrências e relatório
+    def test_laboratorio_desativado_some_da_nova_reserva(self):
+        sv.salvar_laboratorio("Laboratório de Redes", "Bloco B - Sala 12", 30, ativo=False, id_laboratorio=1)
+        self.entrar("professor@labagenda.test", "Professor123")
+        self.assertNotIn("Laboratório de Redes", self.c.get("/reservas/nova").get_data(as_text=True))
+
+    def test_ocorrencia_pela_tela_em_reserva_ja_iniciada(self):
+        rid = self.reservar()
+        db.execute("UPDATE reserva SET status='APROVADA', data_reserva=? WHERE id_reserva=?", (ONTEM, rid))
+        db.commit()
+        self.entrar("tecnico@labagenda.test", "Tecnico123")
+        r = self.c.post("/ocorrencias", data={"csrf": self.token("/ocorrencias"), "id_reserva": rid,
+                        "descricao": "Projetor sem imagem"}, follow_redirects=True)
+        self.assertIn("Ocorrência registrada", r.get_data(as_text=True))
+
+    def test_ocorrencia_em_reserva_futura_e_recusada_pela_tela(self):
+        rid = self.reservar()
+        sv.decidir_reserva(rid, self.tec, True)
+        self.entrar("tecnico@labagenda.test", "Tecnico123")
+        r = self.c.post("/ocorrencias", data={"csrf": self.token("/ocorrencias"), "id_reserva": rid,
+                        "descricao": "Projetor sem imagem"}, follow_redirects=True)
+        self.assertIn("só pode ser registrada", r.get_data(as_text=True))
+
+    def test_relatorio_mensal_na_tela_e_em_csv(self):
+        rid = self.reservar(i="08:00", f="10:30")
+        sv.decidir_reserva(rid, self.tec, True)
+        self.entrar("tecnico@labagenda.test", "Tecnico123")
+        url = f"/relatorio?inicio={AMANHA}&fim={AMANHA}"
+        self.assertIn("2.5", self.c.get(url).get_data(as_text=True))
+        r = self.c.get(f"/relatorio.csv?inicio={AMANHA}&fim={AMANHA}")
+        self.assertEqual(r.mimetype, "text/csv")
+        txt = r.get_data(as_text=True)
+        self.assertTrue(txt.startswith("\ufeffLaboratório;Reservas aprovadas;Horas de uso"))
+        self.assertIn("Laboratório de Redes;1;2,5", txt)
+
+    def test_csv_neutraliza_formula(self):
+        sv.salvar_laboratorio("=SOMA(1;1)", "Bloco X", 10)
+        rid = self.reservar(lab=4)
+        sv.decidir_reserva(rid, self.tec, True)
+        self.entrar("tecnico@labagenda.test", "Tecnico123")
+        txt = self.c.get(f"/relatorio.csv?inicio={AMANHA}&fim={AMANHA}").get_data(as_text=True)
+        self.assertIn("'=SOMA", txt)
+
+    # --- Colega 5: usabilidade
+    def test_pagina_tem_link_de_salto_foco_e_idioma(self):
+        h = self.c.get("/login").get_data(as_text=True)
+        self.assertIn('<html lang="pt-BR">', h)
+        self.assertIn("Pular para o conteúdo", h)
+        self.assertIn('name="viewport"', h)
+
+    def test_painel_vazio_ensina_a_reservar(self):
+        self.entrar("aluno@labagenda.test", "Aluno1234")
+        self.assertIn("Como reservar em 3 passos", self.c.get("/painel").get_data(as_text=True))
+
+    def test_tela_de_reserva_mostra_etapas(self):
+        self.entrar("professor@labagenda.test", "Professor123")
+        h = self.c.get("/reservas/nova").get_data(as_text=True)
+        self.assertIn("1. Consultar horários", h)
+        self.assertIn("2. Pedir a reserva", h)
+
+
+def agora_menos(minutos):
+    return dt.datetime.now() - dt.timedelta(minutes=minutos)
 
 
 if __name__ == "__main__":

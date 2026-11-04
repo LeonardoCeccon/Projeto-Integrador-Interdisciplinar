@@ -1,6 +1,25 @@
 test_laboratorio_e_equipamento (test_labagenda.TestAdmin.test_laboratorio_e_equipamento) ... ok
 test_ocorrencia (test_labagenda.TestAdmin.test_ocorrencia) ... ok
 test_relatorio (test_labagenda.TestAdmin.test_relatorio) ... ok
+test_aluno_nao_acessa_area_do_tecnico (test_labagenda.TestFeedbackV2.test_aluno_nao_acessa_area_do_tecnico) ... ok
+test_bloqueio_apos_cinco_senhas_erradas (test_labagenda.TestFeedbackV2.test_bloqueio_apos_cinco_senhas_erradas) ... ok
+test_cadastro_erros_ao_lado_de_cada_campo (test_labagenda.TestFeedbackV2.test_cadastro_erros_ao_lado_de_cada_campo) ... ok
+test_csv_neutraliza_formula (test_labagenda.TestFeedbackV2.test_csv_neutraliza_formula) ... ok
+test_depois_de_sair_o_painel_exige_login (test_labagenda.TestFeedbackV2.test_depois_de_sair_o_painel_exige_login) ... ok
+test_email_invalido_sozinho (test_labagenda.TestFeedbackV2.test_email_invalido_sozinho) ... ok
+test_erro_de_conflito_aparece_no_campo_de_horario (test_labagenda.TestFeedbackV2.test_erro_de_conflito_aparece_no_campo_de_horario) ... ok
+test_laboratorio_desativado_some_da_nova_reserva (test_labagenda.TestFeedbackV2.test_laboratorio_desativado_some_da_nova_reserva) ... ok
+test_login_vazio_marca_os_dois_campos (test_labagenda.TestFeedbackV2.test_login_vazio_marca_os_dois_campos) ... ok
+test_mensagem_de_reserva_traz_detalhes (test_labagenda.TestFeedbackV2.test_mensagem_de_reserva_traz_detalhes) ... ok
+test_ocorrencia_em_reserva_futura_e_recusada_pela_tela (test_labagenda.TestFeedbackV2.test_ocorrencia_em_reserva_futura_e_recusada_pela_tela) ... ok
+test_ocorrencia_pela_tela_em_reserva_ja_iniciada (test_labagenda.TestFeedbackV2.test_ocorrencia_pela_tela_em_reserva_ja_iniciada) ... ok
+test_pagina_tem_link_de_salto_foco_e_idioma (test_labagenda.TestFeedbackV2.test_pagina_tem_link_de_salto_foco_e_idioma) ... ok
+test_painel_vazio_ensina_a_reservar (test_labagenda.TestFeedbackV2.test_painel_vazio_ensina_a_reservar) ... ok
+test_recusa_sem_motivo_mostra_erro_na_linha_certa (test_labagenda.TestFeedbackV2.test_recusa_sem_motivo_mostra_erro_na_linha_certa) ... ok
+test_relatorio_mensal_na_tela_e_em_csv (test_labagenda.TestFeedbackV2.test_relatorio_mensal_na_tela_e_em_csv) ... ok
+test_reserva_sem_horario_marca_campos (test_labagenda.TestFeedbackV2.test_reserva_sem_horario_marca_campos) ... ok
+test_solicitante_ve_motivo_da_recusa (test_labagenda.TestFeedbackV2.test_solicitante_ve_motivo_da_recusa) ... ok
+test_tela_de_reserva_mostra_etapas (test_labagenda.TestFeedbackV2.test_tela_de_reserva_mostra_etapas) ... ok
 test_acesso_sem_login_redireciona (test_labagenda.TestHTTP.test_acesso_sem_login_redireciona) ... ok
 test_conflito_mostra_mensagem (test_labagenda.TestHTTP.test_conflito_mostra_mensagem) ... ok
 test_fluxo_completo (test_labagenda.TestHTTP.test_fluxo_completo) ... ok
@@ -25,6 +44,6 @@ test_login (test_labagenda.TestUsuarios.test_login) ... ok
 test_validacoes (test_labagenda.TestUsuarios.test_validacoes) ... ok
 
 ----------------------------------------------------------------------
-Ran 25 tests in 8.389s
+Ran 44 tests in 15.607s
 
 OK

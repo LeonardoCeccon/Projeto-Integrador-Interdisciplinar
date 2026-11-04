@@ -1,4 +1,6 @@
 flowchart LR
-  N[Navegador<br/>HTML/CSS] -- HTTPS --> G[Gunicorn + Flask<br/>camada web e serviços]
-  G -- "PyMySQL<br/>(usuário com mínimo privilégio)" --> M[(MySQL 8<br/>banco labagenda)]
-  GIT[(Repositório Git)] -. deploy .-> G
+  N[Navegador<br/>HTML/CSS] -- HTTPS --> R[Render<br/>Gunicorn + Flask<br/>rotas, serviços, acesso a dados]
+  R -- "PyMySQL + SSL (ca.pem)<br/>variáveis de ambiente" --> M[(Aiven<br/>MySQL 8<br/>banco defaultdb)]
+  GH[(GitHub<br/>repositório público)] -. "push na branch main<br/>deploy automático" .-> R
+  DEV[Computador do estudante<br/>VS Code + Python + Git] -- "git push" --> GH
+  DEV -. "aplicar_schema.py<br/>app.seed" .-> M

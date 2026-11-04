@@ -1,7 +1,9 @@
+import csv
 import datetime as dt
+import io
 from functools import wraps
 
-from flask import (Blueprint, flash, redirect, render_template, request,
+from flask import (Blueprint, Response, flash, redirect, render_template, request,
                    session, url_for)
 
 from . import services as sv
@@ -41,12 +43,13 @@ def login():
             u = sv.autenticar(request.form.get("email"), request.form.get("senha"))
         except RegraDeNegocio as e:
             flash(str(e), "erro")
-            return render_template("login.html", email=request.form.get("email", "")), 401
+            return render_template("login.html", email=request.form.get("email", ""),
+                                   erros=e.erros), 401
         csrf = session.get("csrf")
         session.clear()
         session.update(uid=u["id_usuario"], nome=u["nome"], perfil=u["perfil"], csrf=csrf)
         return redirect(url_for("main.painel"))
-    return render_template("login.html", email="")
+    return render_template("login.html", email="", erros={})
 
 
 @bp.route("/cadastro", methods=["GET", "POST"])
@@ -57,10 +60,10 @@ def cadastro():
             sv.criar_usuario(f.get("nome"), f.get("email"), f.get("senha"), f.get("perfil"))
         except RegraDeNegocio as e:
             flash(str(e), "erro")
-            return render_template("cadastro.html", f=f), 400
+            return render_template("cadastro.html", f=f, erros=e.erros), 400
         flash(MSG["S01"], "ok")
         return redirect(url_for("main.login"))
-    return render_template("cadastro.html", f={})
+    return render_template("cadastro.html", f={}, erros={})
 
 
 @bp.post("/sair")
@@ -75,7 +78,7 @@ def sair():
 def painel():
     if session["perfil"] == "TECNICO":
         pend = sv.listar_reservas(status="PENDENTE")
-        return render_template("painel_tecnico.html", pendentes=pend)
+        return render_template("painel_tecnico.html", pendentes=pend, erro_reserva=None, erros={})
     reservas = sv.listar_reservas(session["uid"])
     agora = sv.agora()
     for r in reservas:  # só mostra "Cancelar" se ainda der tempo (RN08)
@@ -95,16 +98,17 @@ def nova_reserva():
     ocupados = sv.horarios_ocupados(id_lab, f.get("data")) if id_lab and f.get("data") else []
     if request.method == "POST":
         try:
-            sv.criar_reserva(session["uid"], id_lab, f.get("data"), f.get("hora_inicio"),
-                             f.get("hora_fim"), f.get("finalidade"),
-                             [i for i in (_int(x) for x in request.form.getlist("equipamentos")) if i])
+            res = sv.criar_reserva(session["uid"], id_lab, f.get("data"), f.get("hora_inicio"),
+                                   f.get("hora_fim"), f.get("finalidade"),
+                                   [i for i in (_int(x) for x in request.form.getlist("equipamentos")) if i])
         except RegraDeNegocio as e:
             flash(str(e), "erro")
             return render_template("nova_reserva.html", labs=labs, equips=equips, f=f,
-                                   ocupados=ocupados), 400
-        flash(MSG["S02"], "ok")
+                                   ocupados=ocupados, erros=e.erros), 400
+        flash(MSG["S02"].format(**res), "ok")
         return redirect(url_for("main.painel"))
-    return render_template("nova_reserva.html", labs=labs, equips=equips, f=f, ocupados=ocupados)
+    return render_template("nova_reserva.html", labs=labs, equips=equips, f=f, ocupados=ocupados,
+                           erros={})
 
 
 @bp.post("/reservas/<int:id_reserva>/cancelar")
@@ -123,10 +127,13 @@ def cancelar(id_reserva):
 def decidir(id_reserva):
     aprovar = request.form.get("acao") == "aprovar"
     try:
-        sv.decidir_reserva(id_reserva, session["uid"], aprovar, request.form.get("motivo"))
-        flash(MSG["S03"] if aprovar else MSG["S04"], "ok")
+        info = sv.decidir_reserva(id_reserva, session["uid"], aprovar, request.form.get("motivo"))
+        flash((MSG["S03"] if aprovar else MSG["S04"]).format(**info), "ok")
     except RegraDeNegocio as e:
         flash(str(e), "erro")
+        if e.codigo == "E14":  # volta ao painel mostrando o erro junto do campo certo
+            return render_template("painel_tecnico.html", pendentes=sv.listar_reservas(status="PENDENTE"),
+                                   erro_reserva=id_reserva, erros=e.erros), 400
     return redirect(url_for("main.painel"))
 
 
@@ -199,3 +206,26 @@ def relatorio():
     except RegraDeNegocio as e:
         flash(str(e), "erro")
     return render_template("relatorio.html", linhas=linhas, ini=ini, fim=fim)
+
+
+@bp.route("/relatorio.csv")
+@login_required("TECNICO")
+def relatorio_csv():
+    hoje = dt.date.today()
+    ini = request.args.get("inicio", (hoje - dt.timedelta(days=30)).isoformat())
+    fim = request.args.get("fim", hoje.isoformat())
+    try:
+        linhas = sv.relatorio_uso(ini, fim)
+    except RegraDeNegocio as e:
+        flash(str(e), "erro")
+        return redirect(url_for("main.relatorio"))
+    saida = io.StringIO()
+    w = csv.writer(saida, delimiter=";")        # ';' abre direto no Excel em português
+    w.writerow(["Laboratório", "Reservas aprovadas", "Horas de uso"])
+    for ln in linhas:
+        nome = ln["laboratorio"]
+        if nome[:1] in "=+-@":                   # evita injeção de fórmula em planilhas
+            nome = "'" + nome
+        w.writerow([nome, ln["reservas"], f"{ln['horas']:.1f}".replace(".", ",")])
+    return Response("\ufeff" + saida.getvalue(), mimetype="text/csv",
+                    headers={"Content-Disposition": f"attachment; filename=uso_{ini}_{fim}.csv"})

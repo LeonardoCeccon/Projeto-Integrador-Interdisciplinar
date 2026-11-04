@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
 <header class="top">
   <span class="logo">LabAgenda</span>
   {% if usuario_atual %}
@@ -25,10 +26,12 @@
   </form>
   {% endif %}
 </header>
-<main>
+<main id="conteudo" tabindex="-1">
   {% with mensagens = get_flashed_messages(with_categories=true) %}
     {% for cat, texto in mensagens %}<div class="msg {{ cat }}" role="{{ 'alert' if cat == 'erro' else 'status' }}">{{ texto }}</div>{% endfor %}
   {% endwith %}
   {% block conteudo %}{% endblock %}
 </main>
+<footer class="rodape">LabAgenda v{{ versao }}</footer>
+<script>var i=document.querySelector("[aria-invalid=true]");if(i){i.focus();}</script>
 </body></html>

@@ -3,12 +3,14 @@
 Uso:  python -m app.seed
 Senhas de demonstração: troque em qualquer ambiente real.
 """
+import os
+
 from werkzeug.security import generate_password_hash
 
 from . import create_app, db
 
 USUARIOS = [
-    ("Teresa Almeida", "tecnico@labagenda.test", "Tecnico123", "TECNICO"),
+    ("Teresa Almeida", "tecnico@labagenda.test", os.environ.get("SEED_SENHA_TECNICO", "Tecnico123"), "TECNICO"),
     ("Paulo Ribeiro", "professor@labagenda.test", "Professor123", "PROFESSOR"),
     ("Marina Costa", "aluno@labagenda.test", "Aluno1234", "ALUNO"),
 ]

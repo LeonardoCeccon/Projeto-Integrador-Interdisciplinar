@@ -52,6 +52,7 @@ próximo passo. Erros usam fundo vermelho-claro e `role="alert"`; sucessos, fund
 | E08 | Fim ≤ início | O horário final deve ser depois do horário inicial. |
 | E09 | Mais de 4 h | Cada reserva pode durar no máximo 4 horas. |
 | E10 | Fora do expediente | O laboratório funciona das 07:00 às 22:00. Escolha um horário dentro desse período. |
+| E25 | Excesso de tentativas de login | Muitas tentativas de acesso. Aguarde 10 minutos e tente de novo. |
 | E11 | Conflito | Este laboratório já está reservado em parte desse horário. Consulte os horários já ocupados no quadro amarelo acima. |
 | E12 | Equipamento indisponível | O equipamento '{nome}' não está livre nesse horário. |
 | E13 | Laboratório desativado | Este laboratório está desativado e não aceita reservas. |
@@ -61,7 +62,7 @@ próximo passo. Erros usam fundo vermelho-claro e `role="alert"`; sucessos, fund
 | E17 | Sem permissão | Você não tem permissão para acessar esta página. |
 | E18 | Registro inexistente | Registro não encontrado. |
 | E19–E24 | Cadastros e datas | Ver arquivo (capacidade, nome duplicado, patrimônio duplicado, ocorrência, sessão expirada, data inválida) |
-| S01–S09 | Sucessos | Ex.: "Reserva enviada! Ela aguarda a aprovação do técnico." |
+| S01–S09 | Sucessos | Ex. (v2.0): "Reserva enviada! Laboratório de Redes, 25/10/2026 das 08:00 às 10:00. Ela aguarda a aprovação do técnico." |
 
 ## 3.5 Protótipo implementado (capturas reais)
 | Tela | Imagem | Observações de projeto |
@@ -86,7 +87,16 @@ próximo passo. Erros usam fundo vermelho-claro e `role="alert"`; sucessos, fund
 4. Rótulos permanentes em vez de textos de exemplo dentro dos campos.
 5. Layout adaptado a telas de 390 px de largura.
 
-## 3.7 Pontos a validar com colegas (roteiro de avaliação heurística)
+## 3.7 Melhorias de IHC da v2.0 (feedback dos colegas)
+1. Erro **ao lado do campo**, com ícone, borda vermelha, `aria-invalid`, `aria-describedby` e foco automático.
+2. Indicador de etapas na reserva e ajuda "Como reservar em 3 passos" para quem não tem reservas.
+3. Mensagens de sucesso com detalhes (o que foi feito, com quem, quando).
+4. Link "Pular para o conteúdo" para teclado e leitores de tela.
+5. Exportação CSV do relatório.
+
+Capturas: `tela13` a `tela16` em `docs/img/` (ver [08-feedback-e-versao-2.md](08-feedback-e-versao-2.md)).
+
+## 3.8 Pontos a validar com colegas (roteiro de avaliação heurística)
 - A pessoa consegue fazer uma reserva sem instrução? Quanto tempo leva?
 - Entende por que o pedido foi recusado?
 - O quadro de horários ocupados é percebido antes de errar o horário?

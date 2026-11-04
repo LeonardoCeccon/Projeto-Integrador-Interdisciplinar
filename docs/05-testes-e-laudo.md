@@ -2,7 +2,7 @@
 
 ## 5.1 Testes automatizados
 Arquivo: `tests/test_labagenda.py` · Execução: `python -m unittest discover -s tests -v`
-Saída registrada em `docs/evidencias/execucao_testes.txt` — **25 testes, 0 falhas**.
+Saída registrada em `docs/evidencias/execucao_testes.txt` — **44 testes, 0 falhas** (v2.0; eram 25 na v1.0).
 
 | Grupo | O que cobre |
 |---|---|
@@ -11,10 +11,8 @@ Saída registrada em `docs/evidencias/execucao_testes.txt` — **25 testes, 0 fa
 | Administração | validações de laboratório/equipamento, ocorrência, relatório de horas |
 | HTTP | login inválido (401), POST sem CSRF, fluxo professor → técnico, mensagem de conflito (400), escape de HTML (XSS) |
 
-> **Limite do ambiente:** os testes rodam com SQLite (`database/schema_sqlite.sql`), que espelha as tabelas e
-> regras. O script MySQL (`schema.sql`) e o driver PyMySQL **não puderam ser executados** no ambiente em que este
-> material foi produzido. Antes de entregar, rode `schema.sql` num MySQL 8 e repita o roteiro da seção 5.2 com
-> `DB_ENGINE=mysql`.
+> **Observação:** os testes automatizados rodam com SQLite (`database/schema_sqlite.sql`), que espelha as tabelas e regras.
+> O mesmo código foi executado contra o **MySQL 8 do Aiven** em produção (seção 5.6).
 
 ## 5.2 Roteiro de teste manual para os colegas
 | # | Passo | Resultado esperado |
@@ -31,10 +29,10 @@ Saída registrada em `docs/evidencias/execucao_testes.txt` — **25 testes, 0 fa
 | 10 | Abrir no celular (ou janela estreita) | Tabelas viram cartões |
 
 ## 5.3 Registro de testes com colegas
-O documento Word de entrega traz 5 registros de teste elaborados como simulação a partir do comportamento real do sistema. Confirme cada um com o colega correspondente e ajuste ao que ele realmente observar.
+As respostas dos 5 colegas foram transcritas, como recebidas, na tabela do documento Word de entrega e analisadas em [08-feedback-e-versao-2.md](08-feedback-e-versao-2.md).
 
 ## 5.4 Laudo de qualidade
-**Sistema:** LabAgenda 2.0 · **Data da verificação:** 24/10/2026 · **Método:** testes automatizados, inspeção das telas em navegador (Chromium, desktop 1100 px e celular 390 px) e revisão de código.
+**Sistema:** LabAgenda 1.0 (versão entregue aos colegas) · **Data da verificação:** 24/10/2026 · **Método:** testes automatizados, inspeção das telas em navegador (Chromium, desktop 1100 px e celular 390 px) e revisão de código.
 
 ### Defeitos encontrados e corrigidos
 | ID | Gravidade | Descrição | Evidência | Correção | Reteste |
@@ -58,12 +56,49 @@ O documento Word de entrega traz 5 registros de teste elaborados como simulaçã
 ### Pendências conhecidas
 | ID | Descrição | Tratamento sugerido |
 |---|---|---|
-| P01 | Execução contra MySQL real ainda não registrada | Rodar `schema.sql` + roteiro 5.2 e anexar capturas |
-| P02 | Cookie sem flag `Secure` em desenvolvimento | Ativar `SESSION_COOKIE_SECURE=True` em produção com HTTPS |
-| P03 | Sem limite de tentativas de login | Backlog: bloqueio temporário após falhas |
+| P01 | Execução contra MySQL real ainda não registrada | **Resolvida** (seção 5.6): tabelas criadas e sistema publicado usando o MySQL 8 do Aiven |
+| P02 | Cookie sem flag `Secure` em desenvolvimento | **Configurável na v2.0** (`SECURE_COOKIES=1`); ativar em produção com HTTPS |
+| P03 | Sem limite de tentativas de login | **Resolvida na v2.0** (bloqueio após 5 falhas, E25) |
 | P04 | Sem recuperação de senha | Backlog |
-| P05 | Relatório sem exportação | Backlog |
+| P05 | Relatório sem exportação | **Resolvida na v2.0** (CSV) |
 
 ### Parecer
-Dentro do escopo da versão 2.0, as regras RN01–RN10 estão implementadas e cobertas por testes, e os defeitos
+Dentro do escopo da versão 1.0, as regras RN01–RN10 estão implementadas e cobertas por testes, e os defeitos
 D01–D04 foram corrigidos e retestados. **Aprovado condicionalmente**, pendente da pendência P01.
+
+## 5.5 Reteste da versão 2.0
+| ID | Origem | Verificação | Resultado |
+|---|---|---|---|
+| R01 | Colega 1 | Login e cadastro com campos vazios/e-mail inválido mostram erro junto do campo | Aprovado (testes + `tela13`) |
+| R02 | Colega 2 | Reserva com campos vazios marca cada campo; conflito aparece no campo de horário | Aprovado (`tela14`) |
+| R03 | Colega 3 | Recusa sem motivo mostra erro na linha da reserva e mantém pendente | Aprovado (`tela15`) |
+| R04 | Colega 3 | Aluno barrado em `/relatorio`, `/relatorio.csv`, `/equipamentos`, `/ocorrencias` | Aprovado |
+| R05 | Colega 4 | Ocorrência em reserva futura é recusada; em reserva iniciada é aceita | Aprovado |
+| R06 | Colega 4 | Relatório na tela e em CSV com 2,5 h para uma reserva de 08:00–10:30 | Aprovado |
+| R07 | Colega 5 | Link de salto, idioma, viewport, etapas e ajuda inicial presentes | Aprovado (`tela16`) |
+| R08 | Segurança | Bloqueio após 5 falhas, mesmo com a senha certa; libera após a janela | Aprovado |
+
+
+
+## 5.6 Verificação em produção (Render + MySQL 8 no Aiven)
+**URL:** https://projeto-integrador-interdisciplinar.onrender.com · **Data:** 03/11/2026
+
+| Verificação | Resultado |
+|---|---|
+| `aplicar_schema.py` executou os 13 comandos do `schema.sql` no MySQL do Aiven (6 tabelas, 6 índices, 1 visão) | Aprovado |
+| Carga inicial (`app.seed`) executada contra o banco de nuvem | Aprovado |
+| Conexão da aplicação ao MySQL com SSL a partir do Render | Aprovado |
+| Login no site publicado com usuário de demonstração | Aprovado |
+| Roteiro 5.2 completo no site publicado (reservas, conflito, painel do técnico, relatório, celular) | *Registrar aqui as capturas após executar* |
+
+### Incidentes da implantação
+| ID | Gravidade | Descrição | Evidência | Correção | Reteste |
+|---|---|---|---|---|---|
+| D05 | Alta | Site retornava *Internal Server Error*: variáveis de ambiente do Render vazias, o sistema tentava conectar em `127.0.0.1:3306` | Log: `ConnectionRefusedError: [Errno 111]` | Variáveis cadastradas em *Environment* e novo deploy | Log passou a mostrar a conexão chegando ao Aiven |
+| D06 | Alta | Banco recusava a senha ao conectar pelo Render, embora funcionasse localmente | Log: `OperationalError 1045 Access denied` | `DB_PASSWORD` recriada e `.strip()` aplicado às credenciais (`app/__init__.py`) | Login funcionando no site publicado |
+
+Lição registrada: erros de configuração são mais rápidos de diagnosticar pelo **final do Traceback nos Logs** do Render; a primeira linha (`Traceback (most recent call last):`) não traz a causa.
+
+### Parecer final
+Regras RN01–RN10 implementadas e cobertas por 44 testes automatizados; defeitos F01–F04, D01–D04 (v1.0/v2.0) e D05–D06 (implantação) corrigidos e retestados; sistema publicado com MySQL real. **Aprovado.**
+Itens que dependem de novo teste com pessoas (tempo da primeira reserva e nota de usabilidade) seguem para a v2.1.

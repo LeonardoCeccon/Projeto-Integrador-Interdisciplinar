@@ -1,14 +1,15 @@
-{% extends "base.html" %}{% block titulo %}Nova reserva{% endblock %}
+{% extends "base.html" %}{% import "_campos.html" as c %}{% block titulo %}Nova reserva{% endblock %}
 {% block conteudo %}
 <h1>Nova reserva</h1>
+<ol class="passos" aria-label="Etapas"><li class="{{ 'atual' if not (f.get('id_laboratorio') and f.get('data')) }}">1. Consultar horários</li><li class="{{ 'atual' if f.get('id_laboratorio') and f.get('data') }}">2. Pedir a reserva</li><li>3. Aguardar o técnico</li></ol>
 <div class="card">
 <form method="get" action="{{ url_for('main.nova_reserva') }}" class="row" aria-label="Consultar disponibilidade">
   <div><label for="lab">Laboratório</label>
     <select id="lab" name="id_laboratorio" required>
       <option value="">Selecione…</option>
       {% for l in labs %}<option value="{{ l.id_laboratorio }}" {{ 'selected' if f.get('id_laboratorio')|string == l.id_laboratorio|string }}>{{ l.nome }} ({{ l.capacidade }} lugares)</option>{% endfor %}
-    </select></div>
-  <div><label for="dt">Data</label><input id="dt" name="data" type="date" value="{{ f.get('data','') }}" required></div>
+    </select>{{ c.erro(erros,'id_laboratorio') }}</div>
+  <div><label for="dt">Data</label><input id="dt" name="data" type="date" value="{{ f.get('data','') }}" required {{ c.attrs(erros,'data') }}>{{ c.erro(erros,'data') }}</div>
   <div style="align-self:end"><button class="btn sec" type="submit" style="margin:0">Ver horários ocupados</button></div>
 </form>
 {% if f.get('id_laboratorio') and f.get('data') %}
@@ -25,15 +26,16 @@
   <input type="hidden" name="data" value="{{ f.get('data','') }}">
   <p class="hint">Laboratório e data vêm da consulta acima. Funcionamento: 07:00 às 22:00; máximo de 4 horas por reserva.</p>
   <div class="row">
-    <div><label for="hi">Início</label><input id="hi" name="hora_inicio" type="time" value="{{ f.get('hora_inicio','') }}" required></div>
-    <div><label for="hf">Término</label><input id="hf" name="hora_fim" type="time" value="{{ f.get('hora_fim','') }}" required></div>
+    <div><label for="hi">Início</label><input id="hi" name="hora_inicio" type="time" value="{{ f.get('hora_inicio','') }}" required {{ c.attrs(erros,'hora_inicio') }}>{{ c.erro(erros,'hora_inicio') }}</div>
+    <div><label for="hf">Término</label><input id="hf" name="hora_fim" type="time" value="{{ f.get('hora_fim','') }}" required {{ c.attrs(erros,'hora_fim') }}>{{ c.erro(erros,'hora_fim') }}</div>
   </div>
   <label for="fin">Finalidade da reserva</label>
-  <input id="fin" name="finalidade" maxlength="200" value="{{ f.get('finalidade','') }}" placeholder="Ex.: Aula prática de roteamento" required>
+  <input id="fin" name="finalidade" maxlength="200" value="{{ f.get('finalidade','') }}" placeholder="Ex.: Aula prática de roteamento" required {{ c.attrs(erros,'finalidade') }}>
+  {{ c.erro(erros,'finalidade') }}
   {% if equips %}
   <fieldset class="checks" style="border:0;padding:0;margin:.8rem 0 0"><legend style="font-weight:600">Equipamentos (opcional)</legend>
     {% for e in equips %}<label><input type="checkbox" name="equipamentos" value="{{ e.id_equipamento }}"> {{ e.nome }} <span class="hint">({{ e.numero_patrimonio }})</span></label>{% endfor %}
-  </fieldset>{% endif %}
+  {{ c.erro(erros,'equipamentos') }}</fieldset>{% endif %}
   <button class="btn" type="submit">Enviar solicitação</button>
   <a class="btn sec" href="{{ url_for('main.painel') }}">Cancelar</a>
 </form>

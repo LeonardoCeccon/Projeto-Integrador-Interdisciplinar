@@ -17,10 +17,12 @@ def create_app(test_config=None):
         DB_NAME=os.environ.get("DB_NAME", "labagenda"),
         DB_USER=os.environ.get("DB_USER", "labagenda_app").strip(),
         DB_PASSWORD=os.environ.get("DB_PASSWORD", "").strip(),
-                DB_SSL_CA=os.environ.get("DB_SSL_CA", ""),
+        DB_SSL_CA=os.environ.get("DB_SSL_CA", ""),      # caminho do certificado CA (opcional)
         SQLITE_PATH=os.environ.get("SQLITE_PATH", "labagenda_dev.sqlite3"),
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
+        SESSION_COOKIE_SECURE=os.environ.get("SECURE_COOKIES", "0") == "1",  # ligar em produção (HTTPS)
+        VERSAO="2.0",
     )
     if test_config:
         app.config.update(test_config)
@@ -39,7 +41,7 @@ def create_app(test_config=None):
 
     @app.context_processor
     def injetar():
-        return {"csrf_token": session.get("csrf", ""),
+        return {"versao": app.config["VERSAO"], "csrf_token": session.get("csrf", ""),
                 "usuario_atual": {"nome": session.get("nome"), "perfil": session.get("perfil")}
                 if "uid" in session else None}
 

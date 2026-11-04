@@ -68,15 +68,22 @@ Destaques:
 suporte nativo em praticamente todo provedor de hospedagem e ferramentas de administração maduras.
 
 ### Como criar o banco
+**MySQL local com permissão total:**
 ```bash
 mysql -u root -p < database/schema.sql      # cria banco, tabelas, visão e usuário da aplicação
 mysql -u root -p < database/seed.sql        # laboratórios e equipamentos de exemplo
 python -m app.seed                          # usuários de demonstração (senhas com hash)
 ```
+**MySQL em nuvem (Aiven, usado na entrega):** o provedor já cria o banco `defaultdb` e o usuário administrador e não permite `CREATE DATABASE`/`CREATE USER`. Com as variáveis `DB_*` e `DB_SSL_CA` definidas (ver `docs/06-git-e-implantacao.md`):
+```powershell
+python database/aplicar_schema.py database/schema.sql   # ignora comandos não permitidos
+python -m app.seed
+```
 
 ### Rotina de backup sugerida
 ```bash
 mysqldump --single-transaction -u root -p labagenda | gzip > backup_$(date +%F).sql.gz
+# Banco em nuvem: acrescentar --ssl-ca=database/ca.pem -h HOST -P PORTA
 ```
 
 ## 4.4 Dicionário de dados

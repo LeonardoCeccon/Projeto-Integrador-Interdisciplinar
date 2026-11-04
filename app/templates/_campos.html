@@ -1,0 +1,3 @@
+{# Macros de campo com erro ao lado (v2.0): rótulo, marcação aria e mensagem junto do campo #}
+{% macro erro(erros, nome) %}{% if erros and erros.get(nome) %}<span class="erro-campo" id="erro-{{ nome }}" role="alert">{{ erros[nome] }}</span>{% endif %}{% endmacro %}
+{% macro attrs(erros, nome) %}{% if erros and erros.get(nome) %}aria-invalid="true" aria-describedby="erro-{{ nome }}" class="invalido"{% endif %}{% endmacro %}

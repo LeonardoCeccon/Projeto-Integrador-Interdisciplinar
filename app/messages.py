@@ -25,13 +25,22 @@ MSG = {
     "E22": "A ocorrência só pode ser registrada em reservas aprovadas cuja data já começou.",
     "E23": "Sua sessão expirou. Atualize a página e tente novamente.",
     "E24": "Informe uma data válida.",
+    "E25": "Muitas tentativas de acesso. Aguarde {min} minutos e tente de novo.",
     "S01": "Conta criada com sucesso. Agora é só entrar.",
-    "S02": "Reserva enviada! Ela aguarda a aprovação do técnico.",
-    "S03": "Reserva aprovada.",
-    "S04": "Reserva recusada. O solicitante verá o motivo.",
+    "S02": "Reserva enviada! {lab}, {data} das {inicio} às {fim}. Ela aguarda a aprovação do técnico.",
+    "S03": "Reserva #{id} de {nome} aprovada.",
+    "S04": "Reserva #{id} de {nome} recusada. O solicitante verá o motivo.",
     "S05": "Reserva cancelada.",
     "S06": "Laboratório salvo com sucesso.",
     "S07": "Equipamento salvo com sucesso.",
     "S08": "Ocorrência registrada.",
     "S09": "Situação do equipamento atualizada.",
+}
+
+# Texto mostrado ao lado do campo (v2.0). Códigos sem entrada aqui só aparecem no aviso do topo.
+CAMPO_POR_CODIGO = {
+    "E02": "senha", "E03": "email", "E04": "senha", "E06": "email",
+    "E07": "hora_inicio", "E08": "hora_fim", "E09": "hora_fim", "E10": "hora_inicio",
+    "E11": "hora_inicio", "E12": "equipamentos", "E14": "motivo", "E19": "capacidade",
+    "E20": "nome", "E21": "numero_patrimonio", "E24": "data",
 }
