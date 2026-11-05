@@ -22,6 +22,10 @@ Pessoas que acessam o sistema.
 | localizacao | VARCHAR(120) | NN | Bloco/sala |
 | capacidade | SMALLINT UNSIGNED | NN, CHECK > 0 | Lugares disponíveis |
 | ativo | TINYINT(1) | NN, padrão 1 | Aceita reservas? |
+| excluido | TINYINT(1) | NN, padrão 0 | Exclusão lógica (v2.1): 1 = fora de uso, mantido como histórico |
+| excluido_em | DATETIME | NULL | Quando foi excluído |
+| excluido_por | INT UNSIGNED | FK → usuario, NULL | Técnico que excluiu |
+| motivo_exclusao | VARCHAR(200) | NULL | Por que saiu de uso |
 
 ## equipamento
 | Coluna | Tipo | Restrições | Descrição |
@@ -31,6 +35,22 @@ Pessoas que acessam o sistema.
 | nome | VARCHAR(80) | NN | Descrição do equipamento |
 | numero_patrimonio | VARCHAR(30) | NN, UK | Número de patrimônio |
 | status | ENUM('DISPONIVEL','MANUTENCAO','BAIXADO') | NN, padrão DISPONIVEL | Situação |
+| excluido | TINYINT(1) | NN, padrão 0 | Exclusão lógica (v2.1): 1 = fora de uso, mantido como histórico |
+| excluido_em | DATETIME | NULL | Quando foi excluído |
+| excluido_por | INT UNSIGNED | FK → usuario, NULL | Técnico que excluiu |
+| motivo_exclusao | VARCHAR(200) | NULL | Por que saiu de uso |
+
+## historico_alteracao (v2.2)
+| Coluna | Tipo | Restrições | Descrição |
+|---|---|---|---|
+| id_historico | INT UNSIGNED | PK, AI | Identificador |
+| entidade | ENUM('LABORATORIO','EQUIPAMENTO') | NN | Tipo do item alterado |
+| id_entidade | INT UNSIGNED | NN | Identificador do item (sem FK, para sobreviver a qualquer mudança) |
+| referencia | VARCHAR(120) | NN | Nome do item na época |
+| acao | VARCHAR(30) | NN | CADASTRO, EDICAO, SITUACAO, EXCLUSAO, REATIVACAO ou MANUTENCAO |
+| detalhe | VARCHAR(500) | NULL | O que mudou |
+| id_usuario | INT UNSIGNED | FK → usuario, NULL | Técnico responsável |
+| registrado_em | DATETIME | NN, padrão agora | Quando |
 
 ## reserva
 | Coluna | Tipo | Restrições | Descrição |

@@ -4,7 +4,7 @@
 <p class="hint">Laboratórios desativados não aparecem na tela de nova reserva e não aceitam pedidos.</p>
 <div class="card">
 <table>
-<thead><tr><th>Nome</th><th>Localização</th><th>Capacidade</th><th>Situação</th>{% if usuario_atual.perfil == 'TECNICO' %}<th>Editar</th>{% endif %}</tr></thead>
+<thead><tr><th>Nome</th><th>Localização</th><th>Capacidade</th><th>Situação</th>{% if usuario_atual.perfil == 'TECNICO' %}<th>Editar</th><th>Excluir</th>{% endif %}</tr></thead>
 <tbody>{% for l in labs %}
 <tr><td data-l="Nome">{{ l.nome }}</td><td data-l="Localização">{{ l.localizacao }}</td><td data-l="Capacidade">{{ l.capacidade }}</td>
 <td data-l="Situação"><span class="tag {{ 'DISPONIVEL' if l.ativo else 'CANCELADA' }}">{{ 'Ativo' if l.ativo else 'Desativado' }}</span></td>
@@ -14,7 +14,8 @@
  <input name="nome" value="{{ l.nome }}" aria-label="Nome" required><input name="localizacao" value="{{ l.localizacao }}" aria-label="Localização" required>
  <input name="capacidade" type="number" min="1" value="{{ l.capacidade }}" aria-label="Capacidade" required>
  <select name="ativo" aria-label="Situação"><option value="1" {{ 'selected' if l.ativo }}>Ativo</option><option value="0" {{ 'selected' if not l.ativo }}>Desativado</option></select>
- <button class="btn small" type="submit">Salvar</button></form></td>{% endif %}
+ <button class="btn small" type="submit">Salvar</button></form></td>
+<td><a class="btn small danger" href="{{ url_for('main.excluir_laboratorio', id_laboratorio=l.id_laboratorio) }}" aria-label="Excluir {{ l.nome }}">Excluir</a></td>{% endif %}
 </tr>{% endfor %}</tbody></table>
 </div>
 {% if usuario_atual.perfil == 'TECNICO' %}

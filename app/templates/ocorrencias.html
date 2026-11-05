@@ -6,6 +6,10 @@
 <form method="post"><input type="hidden" name="csrf" value="{{ csrf_token }}">
 <label for="rv">Reserva</label><select id="rv" name="id_reserva" required>
 {% for r in reservas %}<option value="{{ r.id_reserva }}">#{{ r.id_reserva }} · {{ r.data_reserva }} · {{ r.laboratorio }} · {{ r.solicitante }}</option>{% endfor %}</select>
+<label for="eq">Equipamento envolvido <span class="hint">(opcional)</span></label>
+<select id="eq" name="id_equipamento"><option value="">Nenhum equipamento específico</option>
+{% for e in equips %}<option value="{{ e.id_equipamento }}" data-reserva="{{ e.id_reserva }}">Reserva #{{ e.id_reserva }} · {{ e.nome }}</option>{% endfor %}</select>
+<label class="checkline"><input type="checkbox" name="manutencao" value="1"> Colocar o equipamento em manutenção</label>
 <label for="ds">O que aconteceu?</label><textarea id="ds" name="descricao" rows="3" maxlength="500" required></textarea>
 <button class="btn" type="submit">Registrar</button></form>
 {% else %}<p class="vazio">Nenhuma reserva aprovada que já tenha começado.</p>{% endif %}</div>
@@ -13,4 +17,11 @@
 {% if lista %}<table><thead><tr><th>Quando</th><th>Laboratório</th><th>Equipamento</th><th>Descrição</th></tr></thead><tbody>
 {% for o in lista %}<tr><td data-l="Quando">{{ o.registrada_em }}</td><td data-l="Laboratório">{{ o.laboratorio }}</td><td data-l="Equipamento">{{ o.equipamento or '—' }}</td><td data-l="Descrição">{{ o.descricao }}</td></tr>{% endfor %}
 </tbody></table>{% else %}<p class="vazio">Sem ocorrências registradas.</p>{% endif %}</div>
+<script>
+(function(){var rv=document.getElementById("rv"),eq=document.getElementById("eq");if(!rv||!eq)return;
+function f(){for(var i=0;i<eq.options.length;i++){var o=eq.options[i],d=o.getAttribute("data-reserva");
+var ok=!d||d===rv.value;o.hidden=!ok;o.disabled=!ok;}
+if(eq.selectedOptions[0]&&eq.selectedOptions[0].disabled)eq.value="";}
+rv.addEventListener("change",f);f();})();
+</script>
 {% endblock %}

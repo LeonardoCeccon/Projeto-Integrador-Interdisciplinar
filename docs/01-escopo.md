@@ -81,6 +81,10 @@ manter a separação clara em relação ao técnico.*
 | RN08 | Só o dono cancela, e apenas antes do início | serviço + botão oculto na tela |
 | RN09 | Ocorrência só em reserva APROVADA cujo horário já começou | serviço |
 | RN10 | Relatório considera apenas reservas APROVADAS | serviço |
+| RN11 (v2.1) | Equipamento ou laboratório é excluído só de forma lógica, com motivo de 5+ caracteres, data e responsável; o histórico (reservas, ocorrências, relatório) é preservado | serviço |
+| RN13 (v2.2) | Cadastro, edição, mudança de situação, exclusão e reativação de laboratórios e equipamentos são registrados (quem, quando e o que mudou) | serviço |
+| RN14 (v2.2) | Equipamento só muda de laboratório se não tiver reservas futuras pendentes/aprovadas; colocar em manutenção por ocorrência exige o equipamento da reserva | serviço |
+| RN12 (v2.1) | Não se exclui laboratório ou equipamento com reservas futuras pendentes/aprovadas; item excluído pode ser reativado em Itens excluídos | serviço |
 
 ## 1.8 Critérios de aceite (resumo)
 - Dado um laboratório com reserva das 08:00 às 10:00, um pedido das 09:00 às 11:00 é rejeitado com a mensagem E11, e um pedido das 10:00 às 11:00 é aceito.

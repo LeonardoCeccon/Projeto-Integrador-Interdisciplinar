@@ -1,10 +1,19 @@
 {% extends "base.html" %}{% block titulo %}Equipamentos{% endblock %}
 {% block conteudo %}
 <h1>Equipamentos</h1>
+<p class="hint">Equipamento quebrado ou fora de uso? Use <strong>Excluir</strong>: ele sai das listas, mas o registro e o motivo ficam guardados em <a href="{{ url_for('main.excluidos') }}">Itens excluídos</a>, de onde podem ser reativados.</p>
+<div class="card"><form method="get" class="filtros" aria-label="Filtros">
+  <div><label for="fq">Buscar nome ou patrimônio</label><input id="fq" name="q" value="{{ filtro.get('q','') }}"></div>
+  <div><label for="fl">Laboratório</label><select id="fl" name="lab"><option value="">Todos</option>
+    {% for l in labs %}<option value="{{ l.id_laboratorio }}" {{ 'selected' if filtro.get('lab') == l.id_laboratorio|string }}>{{ l.nome }}</option>{% endfor %}</select></div>
+  <div><label for="fs">Situação</label><select id="fs" name="situacao"><option value="">Todas</option>
+    {% for v, t in [('DISPONIVEL','Disponível'),('MANUTENCAO','Em manutenção'),('BAIXADO','Baixado')] %}<option value="{{ v }}" {{ 'selected' if filtro.get('situacao') == v }}>{{ t }}</option>{% endfor %}</select></div>
+  <div class="acoes"><button class="btn small" type="submit">Filtrar</button> <a class="btn small sec" href="{{ url_for('main.equipamentos') }}">Limpar</a></div>
+</form></div>
 <div class="card"><table>
-<thead><tr><th>Equipamento</th><th>Patrimônio</th><th>Laboratório</th><th>Situação</th><th>Alterar</th></tr></thead>
+<thead><tr><th>Equipamento</th><th>Patrimônio</th><th>Laboratório</th><th>Situação</th><th>Alterar</th><th>Editar / Excluir</th></tr></thead>
 <tbody>{% for e in itens %}<tr>
-<td data-l="Equipamento">{{ e.nome }}</td><td data-l="Patrimônio">{{ e.numero_patrimonio }}</td><td data-l="Laboratório">{{ e.laboratorio }}</td>
+<td data-l="Equipamento">{{ e.nome }}</td><td data-l="Patrimônio">{{ e.numero_patrimonio }}</td><td data-l="Laboratório">{{ e.laboratorio }}{% if e.laboratorio_excluido %} <span class="tag CANCELADA">laboratório excluído</span>{% endif %}</td>
 <td data-l="Situação"><span class="tag {{ e.status }}">{{ e.status|capitalize }}</span></td>
 <td><form method="post" class="inline"><input type="hidden" name="csrf" value="{{ csrf_token }}">
 <input type="hidden" name="acao" value="status"><input type="hidden" name="id_equipamento" value="{{ e.id_equipamento }}">
@@ -12,7 +21,8 @@
 <option value="DISPONIVEL" {{ 'selected' if e.status=='DISPONIVEL' }}>Disponível</option>
 <option value="MANUTENCAO" {{ 'selected' if e.status=='MANUTENCAO' }}>Em manutenção</option>
 <option value="BAIXADO" {{ 'selected' if e.status=='BAIXADO' }}>Baixado</option></select>
-<button class="btn small" type="submit">OK</button></form></td></tr>{% endfor %}</tbody></table></div>
+<button class="btn small" type="submit">OK</button></form></td>
+<td><a class="btn small sec" href="{{ url_for('main.editar_equipamento', id_equipamento=e.id_equipamento) }}" aria-label="Editar {{ e.nome }}">Editar</a> <a class="btn small danger" href="{{ url_for('main.excluir_equipamento', id_equipamento=e.id_equipamento) }}" aria-label="Excluir {{ e.nome }}">Excluir</a></td></tr>{% endfor %}</tbody></table></div>
 <div class="card"><h2>Cadastrar equipamento</h2>
 <form method="post"><input type="hidden" name="csrf" value="{{ csrf_token }}">
 <div class="row"><div><label for="lb">Laboratório</label><select id="lb" name="id_laboratorio" required>

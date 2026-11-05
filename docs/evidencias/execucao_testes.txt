@@ -1,6 +1,22 @@
 test_laboratorio_e_equipamento (test_labagenda.TestAdmin.test_laboratorio_e_equipamento) ... ok
 test_ocorrencia (test_labagenda.TestAdmin.test_ocorrencia) ... ok
 test_relatorio (test_labagenda.TestAdmin.test_relatorio) ... ok
+test_aluno_e_professor_nao_acessam_exclusao (test_labagenda.TestExclusaoV21.test_aluno_e_professor_nao_acessam_exclusao) ... ok
+test_bloqueio_de_laboratorio_mostra_aviso_na_tela (test_labagenda.TestExclusaoV21.test_bloqueio_de_laboratorio_mostra_aviso_na_tela) ... ok
+test_equipamento_com_reserva_futura_nao_pode_ser_excluido (test_labagenda.TestExclusaoV21.test_equipamento_com_reserva_futura_nao_pode_ser_excluido) ... ok
+test_equipamento_excluido_nao_pode_ser_reservado_nem_alterado (test_labagenda.TestExclusaoV21.test_equipamento_excluido_nao_pode_ser_reservado_nem_alterado) ... ok
+test_equipamento_excluido_some_das_listas_e_guarda_o_registro (test_labagenda.TestExclusaoV21.test_equipamento_excluido_some_das_listas_e_guarda_o_registro) ... ok
+test_exclusao_de_equipamento_exige_motivo (test_labagenda.TestExclusaoV21.test_exclusao_de_equipamento_exige_motivo) ... ok
+test_exclusao_de_laboratorio_exige_motivo (test_labagenda.TestExclusaoV21.test_exclusao_de_laboratorio_exige_motivo) ... ok
+test_historico_de_reservas_e_ocorrencias_mantem_equipamento_excluido (test_labagenda.TestExclusaoV21.test_historico_de_reservas_e_ocorrencias_mantem_equipamento_excluido) ... ok
+test_laboratorio_com_reserva_futura_nao_pode_ser_excluido (test_labagenda.TestExclusaoV21.test_laboratorio_com_reserva_futura_nao_pode_ser_excluido) ... ok
+test_laboratorio_excluido_com_equipamentos_some_de_tudo (test_labagenda.TestExclusaoV21.test_laboratorio_excluido_com_equipamentos_some_de_tudo) ... ok
+test_laboratorio_excluido_mantendo_equipamentos_nao_aceita_reserva (test_labagenda.TestExclusaoV21.test_laboratorio_excluido_mantendo_equipamentos_nao_aceita_reserva) ... ok
+test_patrimonio_de_excluido_continua_reservado_e_pode_reativar (test_labagenda.TestExclusaoV21.test_patrimonio_de_excluido_continua_reservado_e_pode_reativar) ... ok
+test_reativacao_de_laboratorio_e_de_equipamento (test_labagenda.TestExclusaoV21.test_reativacao_de_laboratorio_e_de_equipamento) ... ok
+test_relatorio_mantem_horas_de_laboratorio_excluido (test_labagenda.TestExclusaoV21.test_relatorio_mantem_horas_de_laboratorio_excluido) ... ok
+test_tecnico_exclui_e_reativa_pelas_telas (test_labagenda.TestExclusaoV21.test_tecnico_exclui_e_reativa_pelas_telas) ... ok
+test_tela_de_exclusao_de_laboratorio_mostra_equipamentos_e_aba (test_labagenda.TestExclusaoV21.test_tela_de_exclusao_de_laboratorio_mostra_equipamentos_e_aba) ... ok
 test_aluno_nao_acessa_area_do_tecnico (test_labagenda.TestFeedbackV2.test_aluno_nao_acessa_area_do_tecnico) ... ok
 test_bloqueio_apos_cinco_senhas_erradas (test_labagenda.TestFeedbackV2.test_bloqueio_apos_cinco_senhas_erradas) ... ok
 test_cadastro_erros_ao_lado_de_cada_campo (test_labagenda.TestFeedbackV2.test_cadastro_erros_ao_lado_de_cada_campo) ... ok
@@ -42,8 +58,24 @@ test_cadastro_nao_permite_virar_tecnico (test_labagenda.TestUsuarios.test_cadast
 test_cadastro_ok_e_hash (test_labagenda.TestUsuarios.test_cadastro_ok_e_hash) ... ok
 test_login (test_labagenda.TestUsuarios.test_login) ... ok
 test_validacoes (test_labagenda.TestUsuarios.test_validacoes) ... ok
+test_busca_no_historico (test_labagenda.TestV22.test_busca_no_historico) ... ok
+test_edicao_de_equipamento_registra_o_que_mudou (test_labagenda.TestV22.test_edicao_de_equipamento_registra_o_que_mudou) ... ok
+test_edicao_nao_aceita_patrimonio_de_outro_equipamento (test_labagenda.TestV22.test_edicao_nao_aceita_patrimonio_de_outro_equipamento) ... ok
+test_edicao_sem_mudanca_nao_gera_historico (test_labagenda.TestV22.test_edicao_sem_mudanca_nao_gera_historico) ... ok
+test_exclusao_de_laboratorio_com_equipamentos_entra_no_historico (test_labagenda.TestV22.test_exclusao_de_laboratorio_com_equipamentos_entra_no_historico) ... ok
+test_filtro_de_equipamentos (test_labagenda.TestV22.test_filtro_de_equipamentos) ... ok
+test_filtros_de_reservas (test_labagenda.TestV22.test_filtros_de_reservas) ... ok
+test_historico_registra_cadastro_situacao_exclusao_e_reativacao (test_labagenda.TestV22.test_historico_registra_cadastro_situacao_exclusao_e_reativacao) ... ok
+test_manutencao_exige_equipamento_e_equipamento_da_reserva (test_labagenda.TestV22.test_manutencao_exige_equipamento_e_equipamento_da_reserva) ... ok
+test_mudar_equipamento_de_laboratorio (test_labagenda.TestV22.test_mudar_equipamento_de_laboratorio) ... ok
+test_nao_muda_de_laboratorio_com_reserva_futura (test_labagenda.TestV22.test_nao_muda_de_laboratorio_com_reserva_futura) ... ok
+test_ocorrencia_ligada_ao_equipamento_e_manutencao (test_labagenda.TestV22.test_ocorrencia_ligada_ao_equipamento_e_manutencao) ... ok
+test_ocorrencia_sem_manutencao_nao_muda_a_situacao (test_labagenda.TestV22.test_ocorrencia_sem_manutencao_nao_muda_a_situacao) ... ok
+test_tecnico_usa_telas_novas (test_labagenda.TestV22.test_tecnico_usa_telas_novas) ... ok
+test_tela_de_ocorrencia_oferece_equipamento_e_coloca_em_manutencao (test_labagenda.TestV22.test_tela_de_ocorrencia_oferece_equipamento_e_coloca_em_manutencao) ... ok
+test_telas_novas_so_para_o_tecnico (test_labagenda.TestV22.test_telas_novas_so_para_o_tecnico) ... ok
 
 ----------------------------------------------------------------------
-Ran 44 tests in 15.607s
+Ran 76 tests in 15.816s
 
 OK

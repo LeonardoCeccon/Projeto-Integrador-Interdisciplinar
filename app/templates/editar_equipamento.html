@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% from "_campos.html" import erro, attrs %}
+{% block titulo %}Editar equipamento{% endblock %}
+{% block conteudo %}
+<h1>Editar equipamento</h1>
+<div class="card">
+  <p class="hint">Corrija o nome, o número de patrimônio ou o laboratório. Cada mudança fica registrada no <a href="{{ url_for('main.historico') }}">Histórico</a>.</p>
+  <form method="post"><input type="hidden" name="csrf" value="{{ csrf_token }}">
+    <div class="row">
+      <div><label for="en">Nome</label><input id="en" name="nome" maxlength="80" required value="{{ f.nome }}"></div>
+      <div><label for="pt">Nº de patrimônio</label><input id="pt" name="numero_patrimonio" maxlength="30" required value="{{ f.numero_patrimonio }}" {{ attrs(erros, 'numero_patrimonio')|safe }}>{{ erro(erros, 'numero_patrimonio') }}</div>
+      <div><label for="lb">Laboratório</label><select id="lb" name="id_laboratorio" required {{ attrs(erros, 'id_laboratorio')|safe }}>
+        {% for l in labs %}<option value="{{ l.id_laboratorio }}" {{ 'selected' if l.id_laboratorio|string == f.id_laboratorio|string }}>{{ l.nome }}</option>{% endfor %}</select>{{ erro(erros, 'id_laboratorio') }}</div>
+    </div>
+    <button class="btn" type="submit">Salvar alterações</button>
+    <a class="btn sec" href="{{ url_for('main.equipamentos') }}">Cancelar</a>
+  </form>
+</div>
+{% endblock %}

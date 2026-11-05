@@ -28,10 +28,17 @@ CREATE TABLE laboratorio (
   localizacao    VARCHAR(120) NOT NULL,
   capacidade     SMALLINT UNSIGNED NOT NULL,
   ativo          TINYINT(1)   NOT NULL DEFAULT 1,
+  excluido       TINYINT(1)   NOT NULL DEFAULT 0,        -- exclusão lógica (v2.1)
+  excluido_em    DATETIME     NULL,
+  excluido_por   INT UNSIGNED NULL,
+  motivo_exclusao VARCHAR(200) NULL,
   CONSTRAINT pk_laboratorio PRIMARY KEY (id_laboratorio),
   CONSTRAINT uq_laboratorio_nome UNIQUE (nome),
   CONSTRAINT ck_laboratorio_cap CHECK (capacidade > 0),
-  CONSTRAINT ck_laboratorio_ativo CHECK (ativo IN (0,1))
+  CONSTRAINT ck_laboratorio_ativo CHECK (ativo IN (0,1)),
+  CONSTRAINT ck_laboratorio_excl CHECK (excluido IN (0,1)),
+  CONSTRAINT fk_laboratorio_excl_por FOREIGN KEY (excluido_por)
+    REFERENCES usuario (id_usuario) ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 -- ------------------------------------------------------ equipamento
@@ -41,8 +48,15 @@ CREATE TABLE equipamento (
   nome              VARCHAR(80) NOT NULL,
   numero_patrimonio VARCHAR(30) NOT NULL,
   status            ENUM('DISPONIVEL','MANUTENCAO','BAIXADO') NOT NULL DEFAULT 'DISPONIVEL',
+  excluido          TINYINT(1)   NOT NULL DEFAULT 0,      -- exclusão lógica (v2.1)
+  excluido_em       DATETIME     NULL,
+  excluido_por      INT UNSIGNED NULL,
+  motivo_exclusao   VARCHAR(200) NULL,
   CONSTRAINT pk_equipamento PRIMARY KEY (id_equipamento),
   CONSTRAINT uq_equipamento_patrimonio UNIQUE (numero_patrimonio),
+  CONSTRAINT ck_equipamento_excl CHECK (excluido IN (0,1)),
+  CONSTRAINT fk_equipamento_excl_por FOREIGN KEY (excluido_por)
+    REFERENCES usuario (id_usuario) ON UPDATE CASCADE ON DELETE SET NULL,
   CONSTRAINT fk_equipamento_lab FOREIGN KEY (id_laboratorio)
     REFERENCES laboratorio (id_laboratorio) ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE=InnoDB;
@@ -101,6 +115,24 @@ CREATE TABLE ocorrencia (
     REFERENCES equipamento (id_equipamento) ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB;
 CREATE INDEX idx_oc_reserva ON ocorrencia (id_reserva);
+
+-- ----------------------------------------- historico_alteracao (v2.2)
+-- Registro de quem alterou laboratórios e equipamentos, e o que mudou.
+CREATE TABLE historico_alteracao (
+  id_historico   INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  entidade       ENUM('LABORATORIO','EQUIPAMENTO') NOT NULL,
+  id_entidade    INT UNSIGNED NOT NULL,
+  referencia     VARCHAR(120) NOT NULL,          -- nome do item na época da alteração
+  acao           VARCHAR(30)  NOT NULL,          -- CADASTRO, EDICAO, SITUACAO, EXCLUSAO, REATIVACAO, MANUTENCAO
+  detalhe        VARCHAR(500) NULL,
+  id_usuario     INT UNSIGNED NULL,
+  registrado_em  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT pk_historico PRIMARY KEY (id_historico),
+  CONSTRAINT fk_historico_usuario FOREIGN KEY (id_usuario)
+    REFERENCES usuario (id_usuario) ON UPDATE CASCADE ON DELETE SET NULL
+) ENGINE=InnoDB;
+CREATE INDEX idx_historico_entidade ON historico_alteracao (entidade, id_entidade);
+CREATE INDEX idx_historico_data ON historico_alteracao (registrado_em);
 
 -- ------------------------------------------------------------ visão
 CREATE OR REPLACE VIEW vw_uso_laboratorio AS

@@ -15,7 +15,10 @@
     {% if usuario_atual.perfil != 'TECNICO' %}<a href="{{ url_for('main.nova_reserva') }}">Nova reserva</a>{% endif %}
     <a href="{{ url_for('main.laboratorios') }}">Laboratórios</a>
     {% if usuario_atual.perfil == 'TECNICO' %}
+      <a href="{{ url_for('main.reservas') }}">Reservas</a>
       <a href="{{ url_for('main.equipamentos') }}">Equipamentos</a>
+      <a href="{{ url_for('main.excluidos') }}">Itens excluídos</a>
+      <a href="{{ url_for('main.historico') }}">Histórico</a>
       <a href="{{ url_for('main.ocorrencias') }}">Ocorrências</a>
       <a href="{{ url_for('main.relatorio') }}">Relatório</a>
     {% endif %}

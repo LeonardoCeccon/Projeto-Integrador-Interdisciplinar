@@ -148,7 +148,7 @@ def laboratorios():
         f = request.form
         try:
             sv.salvar_laboratorio(f.get("nome"), f.get("localizacao"), f.get("capacidade"),
-                                  f.get("ativo") == "1", _int(f.get("id_laboratorio")))
+                                  f.get("ativo") == "1", _int(f.get("id_laboratorio")), session["uid"])
             flash(MSG["S06"], "ok")
         except RegraDeNegocio as e:
             flash(str(e), "erro")
@@ -163,17 +163,121 @@ def equipamentos():
         f = request.form
         try:
             if f.get("acao") == "status":
-                sv.alterar_status_equipamento(_int(f.get("id_equipamento")), f.get("status"))
+                sv.alterar_status_equipamento(_int(f.get("id_equipamento")), f.get("status"), session["uid"])
                 flash(MSG["S09"], "ok")
             else:
                 sv.salvar_equipamento(_int(f.get("id_laboratorio")), f.get("nome"),
-                                      f.get("numero_patrimonio"))
+                                      f.get("numero_patrimonio"), session["uid"])
                 flash(MSG["S07"], "ok")
         except RegraDeNegocio as e:
             flash(str(e), "erro")
         return redirect(url_for("main.equipamentos"))
-    return render_template("equipamentos.html", itens=sv.listar_equipamentos(),
-                           labs=sv.listar_laboratorios())
+    q = request.args
+    itens = sv.filtrar_equipamentos(sv.listar_equipamentos(), _int(q.get("lab")), q.get("situacao"), q.get("q"))
+    return render_template("equipamentos.html", itens=itens, labs=sv.listar_laboratorios(), filtro=q)
+
+
+# ------------------------------------------------ v2.2: edição, reservas e histórico
+@bp.route("/equipamentos/<int:id_equipamento>/editar", methods=["GET", "POST"])
+@login_required("TECNICO")
+def editar_equipamento(id_equipamento):
+    item = next((e for e in sv.listar_equipamentos() if e["id_equipamento"] == id_equipamento), None)
+    if not item:
+        flash(MSG["E18"], "erro")
+        return redirect(url_for("main.equipamentos"))
+    labs = sv.listar_laboratorios()
+    if request.method == "POST":
+        f = request.form
+        try:
+            info = sv.editar_equipamento(id_equipamento, f.get("nome"), f.get("numero_patrimonio"),
+                                         _int(f.get("id_laboratorio")), session["uid"])
+        except RegraDeNegocio as e:
+            flash(str(e), "erro")
+            return render_template("editar_equipamento.html", item=item, labs=labs, f=f, erros=e.erros), 400
+        flash(MSG["S14"].format(**info), "ok")
+        return redirect(url_for("main.equipamentos"))
+    return render_template("editar_equipamento.html", item=item, labs=labs, f=item, erros={})
+
+
+@bp.route("/reservas")
+@login_required("TECNICO")
+def reservas():
+    q = request.args
+    try:
+        lista = sv.buscar_reservas(_int(q.get("lab")), q.get("situacao"), q.get("de") or None,
+                                   q.get("ate") or None, q.get("q"))
+    except RegraDeNegocio as e:
+        flash(str(e), "erro")
+        lista = []
+    return render_template("reservas.html", lista=lista, labs=sv.listar_laboratorios(), filtro=q)
+
+
+@bp.route("/historico")
+@login_required("TECNICO")
+def historico():
+    q = request.args
+    return render_template("historico.html", lista=sv.listar_historico(q.get("tipo"), q.get("q")), filtro=q)
+
+
+# ------------------------------------------- exclusão e itens excluídos (v2.1)
+@bp.route("/equipamentos/<int:id_equipamento>/excluir", methods=["GET", "POST"])
+@login_required("TECNICO")
+def excluir_equipamento(id_equipamento):
+    item = next((e for e in sv.listar_equipamentos() if e["id_equipamento"] == id_equipamento), None)
+    if not item:
+        flash(MSG["E18"], "erro")
+        return redirect(url_for("main.equipamentos"))
+    if request.method == "POST":
+        try:
+            info = sv.excluir_equipamento(id_equipamento, session["uid"], request.form.get("motivo"))
+        except RegraDeNegocio as e:
+            flash(str(e), "erro")
+            return render_template("excluir.html", tipo="equipamento", item=item,
+                                   motivo=request.form.get("motivo", ""), erros=e.erros, filhos=[]), 400
+        flash(MSG["S10"].format(**info), "ok")
+        return redirect(url_for("main.equipamentos"))
+    return render_template("excluir.html", tipo="equipamento", item=item, motivo="", erros={}, filhos=[])
+
+
+@bp.route("/laboratorios/<int:id_laboratorio>/excluir", methods=["GET", "POST"])
+@login_required("TECNICO")
+def excluir_laboratorio(id_laboratorio):
+    item = next((l for l in sv.listar_laboratorios() if l["id_laboratorio"] == id_laboratorio), None)
+    if not item:
+        flash(MSG["E18"], "erro")
+        return redirect(url_for("main.laboratorios"))
+    filhos = sv.equipamentos_do_laboratorio(id_laboratorio)
+    if request.method == "POST":
+        try:
+            info = sv.excluir_laboratorio(id_laboratorio, session["uid"], request.form.get("motivo"),
+                                          request.form.get("equipamentos") == "excluir")
+        except RegraDeNegocio as e:
+            flash(str(e), "erro")
+            return render_template("excluir.html", tipo="laboratorio", item=item,
+                                   motivo=request.form.get("motivo", ""), erros=e.erros,
+                                   filhos=filhos), 400
+        flash(MSG["S11"].format(**info), "ok")
+        return redirect(url_for("main.laboratorios"))
+    return render_template("excluir.html", tipo="laboratorio", item=item, motivo="", erros={}, filhos=filhos)
+
+
+@bp.route("/excluidos", methods=["GET", "POST"])
+@login_required("TECNICO")
+def excluidos():
+    if request.method == "POST":
+        f = request.form
+        try:
+            if f.get("tipo") == "laboratorio":
+                info = sv.reativar_laboratorio(_int(f.get("id")), session["uid"])
+                flash(MSG["S13"].format(**info), "ok")
+            else:
+                info = sv.reativar_equipamento(_int(f.get("id")), session["uid"])
+                flash(MSG["S12"].format(**info), "ok")
+        except RegraDeNegocio as e:
+            flash(str(e), "erro")
+        return redirect(url_for("main.excluidos", aba=f.get("tipo", "equipamento")))
+    aba = "laboratorio" if request.args.get("aba") == "laboratorio" else "equipamento"
+    return render_template("excluidos.html", aba=aba, dados=sv.listar_excluidos())
 
 
 # --------------------------------------------------------------- ocorrências
@@ -183,15 +287,22 @@ def ocorrencias():
     if request.method == "POST":
         f = request.form
         try:
-            sv.registrar_ocorrencia(_int(f.get("id_reserva")), f.get("descricao"),
-                                    _int(f.get("id_equipamento")))
-            flash(MSG["S08"], "ok")
+            id_eq = _int(f.get("id_equipamento"))
+            manut = f.get("manutencao") == "1"
+            sv.registrar_ocorrencia(_int(f.get("id_reserva")), f.get("descricao"), id_eq, manut, session["uid"])
+            if manut:
+                nome = next(e["nome"] for e in sv.equipamentos_das_reservas([_int(f.get("id_reserva"))])
+                            if e["id_equipamento"] == id_eq)
+                flash(MSG["S15"].format(nome=nome), "ok")
+            else:
+                flash(MSG["S08"], "ok")
         except RegraDeNegocio as e:
             flash(str(e), "erro")
         return redirect(url_for("main.ocorrencias"))
     aprovadas = [r for r in sv.listar_reservas(status="APROVADA")
                  if r["data_reserva"] <= dt.date.today().isoformat()]
-    return render_template("ocorrencias.html", lista=sv.listar_ocorrencias(), reservas=aprovadas)
+    return render_template("ocorrencias.html", lista=sv.listar_ocorrencias(), reservas=aprovadas,
+                           equips=sv.equipamentos_das_reservas([r["id_reserva"] for r in aprovadas]))
 
 
 @bp.route("/relatorio")

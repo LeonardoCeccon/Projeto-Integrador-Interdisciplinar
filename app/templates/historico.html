@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% block titulo %}Histórico{% endblock %}
+{% macro quando(v) %}{{ v[8:10] ~ '/' ~ v[5:7] ~ '/' ~ v[0:4] ~ ' ' ~ v[11:16] if v else '—' }}{% endmacro %}
+{% set rot = {'CADASTRO':'Cadastro','EDICAO':'Edição','SITUACAO':'Situação','EXCLUSAO':'Exclusão','REATIVACAO':'Reativação','MANUTENCAO':'Manutenção'} %}
+{% block conteudo %}
+<h1>Histórico de alterações</h1>
+<p class="hint">Quem cadastrou, editou, excluiu ou reativou laboratórios e equipamentos, e o que mudou.</p>
+<div class="card"><form method="get" class="filtros" aria-label="Filtros">
+  <div><label for="hq">Buscar</label><input id="hq" name="q" value="{{ filtro.get('q','') }}" placeholder="Nome do item ou texto"></div>
+  <div><label for="ht">Tipo</label><select id="ht" name="tipo"><option value="">Todos</option>
+    <option value="EQUIPAMENTO" {{ 'selected' if filtro.get('tipo') == 'EQUIPAMENTO' }}>Equipamentos</option>
+    <option value="LABORATORIO" {{ 'selected' if filtro.get('tipo') == 'LABORATORIO' }}>Laboratórios</option></select></div>
+  <div class="acoes"><button class="btn small" type="submit">Filtrar</button> <a class="btn small sec" href="{{ url_for('main.historico') }}">Limpar</a></div>
+</form></div>
+<div class="card">
+{% if lista %}<table><thead><tr><th>Quando</th><th>Tipo</th><th>Item</th><th>Ação</th><th>Detalhe</th><th>Por</th></tr></thead><tbody>
+{% for h in lista %}<tr><td data-l="Quando">{{ quando(h.registrado_em) }}</td><td data-l="Tipo">{{ 'Equipamento' if h.entidade == 'EQUIPAMENTO' else 'Laboratório' }}</td>
+<td data-l="Item">{{ h.referencia }}</td><td data-l="Ação">{{ rot.get(h.acao, h.acao) }}</td><td data-l="Detalhe">{{ h.detalhe or '—' }}</td><td data-l="Por">{{ h.usuario or '—' }}</td></tr>{% endfor %}
+</tbody></table>{% else %}<p class="vazio">Nenhum registro encontrado.</p>{% endif %}
+</div>
+{% endblock %}

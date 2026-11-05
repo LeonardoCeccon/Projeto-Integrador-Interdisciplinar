@@ -11,7 +11,7 @@ Projeto-Integrador-Interdisciplinar/
 ├── database/            schema.sql (MySQL), seed.sql, schema_sqlite.sql (testes),
 │                        aplicar_schema.py, ca.pem (certificado público do Aiven), dicionario_dados.md
 ├── docs/                escopo, UML, IHC, dados, testes/laudo, implantação, imagens e fontes dos diagramas
-└── tests/               44 testes automatizados
+└── tests/               76 testes automatizados
 ```
 
 ## 6.2 Fluxo de trabalho com Git

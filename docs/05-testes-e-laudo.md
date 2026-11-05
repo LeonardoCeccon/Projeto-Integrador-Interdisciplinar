@@ -2,7 +2,7 @@
 
 ## 5.1 Testes automatizados
 Arquivo: `tests/test_labagenda.py` · Execução: `python -m unittest discover -s tests -v`
-Saída registrada em `docs/evidencias/execucao_testes.txt` — **44 testes, 0 falhas** (v2.0; eram 25 na v1.0).
+Saída registrada em `docs/evidencias/execucao_testes.txt` — **76 testes, 0 falhas** (v2.2; 60 na v2.1, 44 na v2.0 e 25 na v1.0).
 
 | Grupo | O que cobre |
 |---|---|
@@ -65,6 +65,12 @@ As respostas dos 5 colegas foram transcritas, como recebidas, na tabela do docum
 ### Parecer
 Dentro do escopo da versão 1.0, as regras RN01–RN10 estão implementadas e cobertas por testes, e os defeitos
 D01–D04 foram corrigidos e retestados. **Aprovado condicionalmente**, pendente da pendência P01.
+
+## 5.4-B Versão 2.1 – exclusão lógica
+Sugestão do próprio autor durante os testes: equipamento quebrado ou laboratório que virou sala de aula não devia ficar para sempre como "indisponível". Verificado por 16 testes (classe `TestExclusaoV21`): motivo obrigatório; bloqueio com reservas futuras; sumiço das listas e da reserva; registro, data e responsável guardados; histórico de reservas, ocorrências e relatório preservado; reativação (com bloqueio se o laboratório continua excluído); acesso apenas do técnico.
+
+## 5.4-C Versão 2.2 – histórico, edição, ocorrências e filtros
+Melhorias definidas pelo autor, sem dependência de serviços externos. 16 testes (classe `TestV22`) cobrem: edição de equipamento (patrimônio único, mudança de laboratório bloqueada com reserva futura); histórico de cadastro, edição, situação, exclusão, reativação e manutenção; ocorrência ligada ao equipamento com envio para manutenção; filtros de reservas e de equipamentos; telas restritas ao técnico.
 
 ## 5.5 Reteste da versão 2.0
 | ID | Origem | Verificação | Resultado |

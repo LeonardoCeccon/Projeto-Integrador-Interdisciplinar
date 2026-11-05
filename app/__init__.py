@@ -22,7 +22,7 @@ def create_app(test_config=None):
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
         SESSION_COOKIE_SECURE=os.environ.get("SECURE_COOKIES", "0") == "1",  # ligar em produção (HTTPS)
-        VERSAO="2.0",
+        VERSAO="2.2",
     )
     if test_config:
         app.config.update(test_config)

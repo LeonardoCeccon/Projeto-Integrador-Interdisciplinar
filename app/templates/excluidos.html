@@ -1,0 +1,30 @@
+{% extends "base.html" %}{% block titulo %}Itens excluídos{% endblock %}
+{% macro quando(v) %}{{ v[8:10] ~ '/' ~ v[5:7] ~ '/' ~ v[0:4] ~ ' ' ~ v[11:16] if v else '—' }}{% endmacro %}
+{% block conteudo %}
+<h1>Itens excluídos</h1>
+<p class="hint">Histórico de equipamentos e laboratórios que saíram de uso. Eles não aparecem nas telas de reserva, mas as reservas antigas continuam no relatório.</p>
+<nav aria-label="Tipo de item" class="abas">
+  <a href="{{ url_for('main.excluidos', aba='equipamento') }}" {{ 'aria-current=page class=ativa' if aba == 'equipamento' }}>Equipamentos ({{ dados.equipamentos|length }})</a>
+  <a href="{{ url_for('main.excluidos', aba='laboratorio') }}" {{ 'aria-current=page class=ativa' if aba == 'laboratorio' }}>Laboratórios ({{ dados.laboratorios|length }})</a>
+</nav>
+<div class="card">
+{% if aba == 'equipamento' %}
+  {% if not dados.equipamentos %}<p class="hint">Nenhum equipamento excluído.</p>{% else %}
+  <table><thead><tr><th>Equipamento</th><th>Patrimônio</th><th>Laboratório</th><th>Excluído em</th><th>Por</th><th>Motivo</th><th>Reativar</th></tr></thead><tbody>
+  {% for e in dados.equipamentos %}<tr>
+  <td data-l="Equipamento">{{ e.nome }}</td><td data-l="Patrimônio">{{ e.numero_patrimonio }}</td><td data-l="Laboratório">{{ e.laboratorio }}</td>
+  <td data-l="Excluído em">{{ quando(e.excluido_em) }}</td><td data-l="Por">{{ e.excluido_por_nome or '—' }}</td><td data-l="Motivo">{{ e.motivo_exclusao }}</td>
+  <td><form method="post" class="inline"><input type="hidden" name="csrf" value="{{ csrf_token }}"><input type="hidden" name="tipo" value="equipamento"><input type="hidden" name="id" value="{{ e.id_equipamento }}">
+  <button class="btn small" type="submit" aria-label="Reativar {{ e.nome }}">Reativar</button></form></td></tr>{% endfor %}</tbody></table>{% endif %}
+{% else %}
+  {% if not dados.laboratorios %}<p class="hint">Nenhum laboratório excluído.</p>{% else %}
+  <table><thead><tr><th>Laboratório</th><th>Localização</th><th>Equip.</th><th>Excluído em</th><th>Por</th><th>Motivo</th><th>Reativar</th></tr></thead><tbody>
+  {% for l in dados.laboratorios %}<tr>
+  <td data-l="Laboratório">{{ l.nome }}</td><td data-l="Localização">{{ l.localizacao }}</td><td data-l="Equip.">{{ l.qtd_equipamentos }}</td>
+  <td data-l="Excluído em">{{ quando(l.excluido_em) }}</td><td data-l="Por">{{ l.excluido_por_nome or '—' }}</td><td data-l="Motivo">{{ l.motivo_exclusao }}</td>
+  <td><form method="post" class="inline"><input type="hidden" name="csrf" value="{{ csrf_token }}"><input type="hidden" name="tipo" value="laboratorio"><input type="hidden" name="id" value="{{ l.id_laboratorio }}">
+  <button class="btn small" type="submit" aria-label="Reativar {{ l.nome }}">Reativar</button></form></td></tr>{% endfor %}</tbody></table>
+  <p class="hint">Ao reativar um laboratório, os equipamentos excluídos junto com ele continuam na aba Equipamentos, para você reativar um a um.</p>{% endif %}
+{% endif %}
+</div>
+{% endblock %}

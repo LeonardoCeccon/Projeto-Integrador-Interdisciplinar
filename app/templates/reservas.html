@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% block titulo %}Reservas{% endblock %}
+{% block conteudo %}
+<h1>Reservas</h1>
+<div class="card"><form method="get" class="filtros" aria-label="Filtros">
+  <div><label for="fq">Solicitante ou finalidade</label><input id="fq" name="q" value="{{ filtro.get('q','') }}" placeholder="Ex.: Paulo"></div>
+  <div><label for="fl">Laboratório</label><select id="fl" name="lab"><option value="">Todos</option>
+    {% for l in labs %}<option value="{{ l.id_laboratorio }}" {{ 'selected' if filtro.get('lab') == l.id_laboratorio|string }}>{{ l.nome }}</option>{% endfor %}</select></div>
+  <div><label for="fs">Situação</label><select id="fs" name="situacao"><option value="">Todas</option>
+    {% for v, t in [('PENDENTE','Pendente'),('APROVADA','Aprovada'),('RECUSADA','Recusada'),('CANCELADA','Cancelada')] %}<option value="{{ v }}" {{ 'selected' if filtro.get('situacao') == v }}>{{ t }}</option>{% endfor %}</select></div>
+  <div><label for="fd">De</label><input id="fd" type="date" name="de" value="{{ filtro.get('de','') }}"></div>
+  <div><label for="fa">Até</label><input id="fa" type="date" name="ate" value="{{ filtro.get('ate','') }}"></div>
+  <div class="acoes"><button class="btn small" type="submit">Filtrar</button> <a class="btn small sec" href="{{ url_for('main.reservas') }}">Limpar</a></div>
+</form></div>
+<div class="card">
+{% if lista %}<p class="hint">{{ lista|length }} reserva(s) encontrada(s).</p>
+<table><thead><tr><th>Data</th><th>Horário</th><th>Laboratório</th><th>Solicitante</th><th>Finalidade</th><th>Situação</th></tr></thead><tbody>
+{% for r in lista %}<tr>
+<td data-l="Data">{{ r.data_reserva[8:10] }}/{{ r.data_reserva[5:7] }}/{{ r.data_reserva[:4] }}</td>
+<td data-l="Horário">{{ r.hora_inicio[:5] }}–{{ r.hora_fim[:5] }}</td><td data-l="Laboratório">{{ r.laboratorio }}</td>
+<td data-l="Solicitante">{{ r.solicitante }}</td>
+<td data-l="Finalidade">{{ r.finalidade }}{% if r.equipamentos %}<br><span class="hint">{{ r.equipamentos }}</span>{% endif %}{% if r.motivo_recusa %}<br><span class="hint">Motivo da recusa: {{ r.motivo_recusa }}</span>{% endif %}</td>
+<td data-l="Situação"><span class="tag {{ r.status }}">{{ r.status|capitalize }}</span></td></tr>{% endfor %}
+</tbody></table>
+{% else %}<p class="vazio">Nenhuma reserva encontrada com esses filtros.</p>{% endif %}
+</div>
+{% endblock %}

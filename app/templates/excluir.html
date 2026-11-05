@@ -1,0 +1,29 @@
+{% extends "base.html" %}{% from "_campos.html" import erro, attrs %}
+{% block titulo %}Excluir {{ tipo }}{% endblock %}
+{% block conteudo %}
+<h1>Excluir {{ 'equipamento' if tipo == 'equipamento' else 'laboratório' }}</h1>
+<div class="card">
+  <p><strong>{{ item.nome }}</strong>
+  {% if tipo == 'equipamento' %}· patrimônio {{ item.numero_patrimonio }} · {{ item.laboratorio }}
+  {% else %}· {{ item.localizacao }}{% endif %}</p>
+  <p class="hint">A exclusão não apaga o histórico: o registro fica guardado em <em>Itens excluídos</em>, com data, responsável e motivo, e as reservas antigas continuam no relatório. Você poderá reativá-lo depois.</p>
+  <form method="post"><input type="hidden" name="csrf" value="{{ csrf_token }}">
+    <label for="motivo">Motivo da exclusão</label>
+    <input id="motivo" name="motivo" maxlength="200" value="{{ motivo }}" required {{ attrs(erros, 'motivo_exclusao')|safe }}
+      placeholder="{{ 'Ex.: quebrou e não será substituído' if tipo == 'equipamento' else 'Ex.: virou sala de aula' }}">
+    {{ erro(erros, 'motivo_exclusao') }}
+    {% if tipo == 'laboratorio' %}
+    <fieldset class="checks" style="border:0;padding:0;margin:1rem 0 0">
+      <legend><strong>Equipamentos deste laboratório ({{ filhos|length }})</strong></legend>
+      {% if filhos %}
+      <p class="hint">{{ filhos|map(attribute='nome')|join(', ') }}</p>
+      <label><input type="radio" name="equipamentos" value="excluir" checked> Excluir junto com o laboratório</label>
+      <label><input type="radio" name="equipamentos" value="manter"> Manter na lista de equipamentos (não poderão ser reservados enquanto o laboratório estiver excluído)</label>
+      {% else %}<p class="hint">Este laboratório não tem equipamentos cadastrados.</p>{% endif %}
+    </fieldset>
+    {% endif %}
+    <button class="btn danger" type="submit">Confirmar exclusão</button>
+    <a class="btn sec" href="{{ url_for('main.equipamentos' if tipo == 'equipamento' else 'main.laboratorios') }}">Cancelar</a>
+  </form>
+</div>
+{% endblock %}

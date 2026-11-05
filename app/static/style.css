@@ -46,3 +46,9 @@ input.invalido,select.invalido,textarea.invalido{border:2px solid var(--err);bac
 .passos li.atual{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:700}
 .ajuda{background:#eef6f3;border:1px solid #b9d9cf;border-radius:8px;padding:.8rem 1rem}
 footer.rodape{max-width:980px;margin:2rem auto 1rem;padding:0 1rem;color:var(--muted);font-size:.85rem}
+.abas{display:flex;gap:.5rem;margin:1rem 0 .6rem}
+.abas a{padding:.45rem 1rem;border:1px solid var(--brand);border-radius:6px;color:var(--brand);text-decoration:none;font-weight:600;background:#fff}
+.abas a.ativa{background:var(--brand);color:#fff}
+.filtros{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem .8rem;align-items:end}
+.filtros .acoes{display:flex;gap:.4rem}
+.checkline{display:flex;gap:.5rem;align-items:center;font-weight:400;margin:.6rem 0}.checkline input{width:auto}
