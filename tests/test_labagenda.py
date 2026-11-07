@@ -642,12 +642,33 @@ class TestV22(Base):
         rid = self.aprovada_ontem(eq=[3])
         self.entrar("tecnico@labagenda.test", "Tecnico123")
         h = self.c.get("/ocorrencias").get_data(as_text=True)
-        self.assertIn("Equipamento envolvido", h)
+        self.assertIn("O que foi afetado?", h)
         self.assertIn("Projetor Epson", h)
         r = self.c.post("/ocorrencias", data={"csrf": self.token("/painel"), "id_reserva": rid, "descricao": "Lâmpada queimada",
                         "id_equipamento": "3", "manutencao": "1"}, follow_redirects=True)
         self.assertIn("colocado em manutenção", r.get_data(as_text=True))
         self.assertEqual(db.one("SELECT status FROM equipamento WHERE id_equipamento=3")["status"], "MANUTENCAO")
+
+    def test_ocorrencia_geral_do_laboratorio_aparece_como_tal(self):
+        rid = self.aprovada_ontem(lab=1)                      # reserva sem equipamentos
+        self.entrar("tecnico@labagenda.test", "Tecnico123")
+        h = self.c.get("/ocorrencias").get_data(as_text=True)
+        self.assertIn("Problema geral do laboratório", h)
+        self.assertIn("O que foi afetado?", h)
+        self.c.post("/ocorrencias", data={"csrf": self.token("/painel"), "id_reserva": rid,
+                    "descricao": "Fiação exposta na bancada", "id_equipamento": ""})
+        h = self.c.get("/ocorrencias").get_data(as_text=True)
+        self.assertIn("Geral do laboratório", h)
+        self.assertIn("Fiação exposta na bancada", h)
+        self.assertIsNone(sv.listar_ocorrencias()[0]["id_equipamento"])
+
+    def test_ocorrencia_de_equipamento_nao_aparece_como_geral(self):
+        rid = self.aprovada_ontem(eq=[3])
+        sv.registrar_ocorrencia(rid, "Lâmpada queimada", 3, False, self.tec)
+        self.entrar("tecnico@labagenda.test", "Tecnico123")
+        h = self.c.get("/ocorrencias").get_data(as_text=True)
+        self.assertIn("Projetor Epson", h)
+        self.assertNotIn("Geral do laboratório", h)
 
     # --- filtros
     def test_filtros_de_reservas(self):

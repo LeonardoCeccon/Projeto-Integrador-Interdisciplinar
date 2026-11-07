@@ -2,7 +2,7 @@
 
 ## 5.1 Testes automatizados
 Arquivo: `tests/test_labagenda.py` · Execução: `python -m unittest discover -s tests -v`
-Saída registrada em `docs/evidencias/execucao_testes.txt` — **76 testes, 0 falhas** (v2.2; 60 na v2.1, 44 na v2.0 e 25 na v1.0).
+Saída registrada em `docs/evidencias/execucao_testes.txt` — **78 testes, 0 falhas** (v2.2.1; 76 na v2.2, 60 na v2.1, 44 na v2.0 e 25 na v1.0).
 
 | Grupo | O que cobre |
 |---|---|

@@ -23,5 +23,5 @@ registro de ocorrências e relatório de uso. Projeto Integrador Transdisciplina
 | Rodar e hospedar o projeto (Render + MySQL na nuvem) | [docs/06-git-e-implantacao.md](docs/06-git-e-implantacao.md) |
 
 ```bash
-python -m unittest discover -s tests -v   # 76 testes
+python -m unittest discover -s tests -v   # 78 testes
 ```

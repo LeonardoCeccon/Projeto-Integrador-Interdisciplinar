@@ -1,5 +1,10 @@
 # Histórico de versões
 
+## 2.2.1 – ocorrência geral do laboratório
+- Tela de ocorrências: caixa **"O que foi afetado?"** com os equipamentos da reserva escolhida e a opção **"Problema geral do laboratório"** (fiação, ar-condicionado, iluminação…). O histórico mostra "Geral do laboratório" quando nenhum equipamento está ligado.
+- A caixa de equipamentos se ajusta à reserva escolhida; "colocar em manutenção" só fica disponível com um equipamento selecionado.
+- 2 novos testes (total 78).
+
 ## 2.2 – histórico, edição, ocorrências com equipamento e filtros
 - **Histórico de alterações** (tela nova, técnico): registra quem cadastrou, editou, mudou a situação, excluiu ou reativou laboratórios e equipamentos, com o que mudou (ex.: patrimônio 'PAT-0003' → 'PAT-0300'). Tabela nova `historico_alteracao`.
 - **Edição de equipamentos**: nome, patrimônio e laboratório. O patrimônio continua único; mudar de laboratório é bloqueado se houver reservas futuras (E30). Laboratórios já eram editáveis na lista e agora também entram no histórico.

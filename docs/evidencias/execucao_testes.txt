@@ -69,6 +69,8 @@ test_historico_registra_cadastro_situacao_exclusao_e_reativacao (test_labagenda.
 test_manutencao_exige_equipamento_e_equipamento_da_reserva (test_labagenda.TestV22.test_manutencao_exige_equipamento_e_equipamento_da_reserva) ... ok
 test_mudar_equipamento_de_laboratorio (test_labagenda.TestV22.test_mudar_equipamento_de_laboratorio) ... ok
 test_nao_muda_de_laboratorio_com_reserva_futura (test_labagenda.TestV22.test_nao_muda_de_laboratorio_com_reserva_futura) ... ok
+test_ocorrencia_de_equipamento_nao_aparece_como_geral (test_labagenda.TestV22.test_ocorrencia_de_equipamento_nao_aparece_como_geral) ... ok
+test_ocorrencia_geral_do_laboratorio_aparece_como_tal (test_labagenda.TestV22.test_ocorrencia_geral_do_laboratorio_aparece_como_tal) ... ok
 test_ocorrencia_ligada_ao_equipamento_e_manutencao (test_labagenda.TestV22.test_ocorrencia_ligada_ao_equipamento_e_manutencao) ... ok
 test_ocorrencia_sem_manutencao_nao_muda_a_situacao (test_labagenda.TestV22.test_ocorrencia_sem_manutencao_nao_muda_a_situacao) ... ok
 test_tecnico_usa_telas_novas (test_labagenda.TestV22.test_tecnico_usa_telas_novas) ... ok
@@ -76,6 +78,6 @@ test_tela_de_ocorrencia_oferece_equipamento_e_coloca_em_manutencao (test_labagen
 test_telas_novas_so_para_o_tecnico (test_labagenda.TestV22.test_telas_novas_so_para_o_tecnico) ... ok
 
 ----------------------------------------------------------------------
-Ran 76 tests in 15.816s
+Ran 78 tests in 17.091s
 
 OK
