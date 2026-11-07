@@ -52,25 +52,11 @@ ponta (pelas telas) e melhorei a interface onde a experiência podia ficar mais 
 
 ## 8.5 Limitações conhecidas da v2.0
 - O bloqueio de tentativas fica na memória do processo: serve para um servidor simples; com vários processos use Redis ou uma tabela no banco.
-- O roteiro foi executado depois contra o MySQL real da implantação (ver seção 5.6 do laudo).
+- Ainda não executei o roteiro contra um MySQL real (pendência P01 do laudo).
 - Itens que os colegas não conseguiram confirmar e dependem de **medição humana** (tempo da 1ª reserva, nota de usabilidade) só podem ser obtidos em um novo teste com pessoas.
 
-## 8.6 Melhorias do autor (v2.1, v2.2 e v2.2.1)
-Não vieram do teste dos colegas: surgiram quando o próprio autor usou o sistema para gravar a demonstração e percebeu lacunas. Entram no ciclo Kaizen como melhorias de segunda rodada.
-
-| Versão | Melhoria | Motivo |
-|---|---|---|
-| 2.1 | **Exclusão lógica** de equipamentos e laboratórios, com motivo, data e responsável; tela **Itens excluídos** com abas e botão **Reativar** | Marcar como "indisponível" deixava itens fora de uso na lista para sempre; era preciso manter o histórico |
-| 2.2 | **Histórico de alterações** (cadastro, edição, situação, exclusão, reativação, manutenção) | Saber quem mudou o quê |
-| 2.2 | **Edição de equipamentos** (nome, patrimônio, laboratório) | Corrigir erro de digitação sem recadastrar |
-| 2.2 | **Ocorrência ligada ao equipamento**, com envio para manutenção | A tela não permitia escolher o equipamento |
-| 2.2 | **Filtros e busca**: reservas do técnico, equipamentos e histórico | Listas crescem com o uso |
-| 2.2.1 | Opção **"Problema geral do laboratório"** nas ocorrências (fiação, ar-condicionado…) | Nem toda ocorrência envolve um equipamento |
-
-Testes: 44 → **78 testes automatizados**.
-
-## 8.7 Próximo ciclo Kaizen
-1. Notificação por e-mail quando a reserva for decidida (depende de serviço externo).
+## 8.6 Próximo ciclo Kaizen (v2.1)
+1. Notificação por e-mail quando a reserva for decidida.
 2. Recuperação de senha.
 3. Calendário semanal visual.
 4. Repetir o teste com os mesmos colegas, **medindo** tempo da primeira reserva e nota de 1 a 5.
