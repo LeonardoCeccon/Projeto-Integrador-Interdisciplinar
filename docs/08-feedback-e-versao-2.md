@@ -25,20 +25,21 @@ ponta (pelas telas) e melhorei a interface onde a experiência podia ficar mais 
 ## 8.3 Mudanças da v2.0
 | # | Origem | Mudança | Arquivos principais | Teste |
 |---|---|---|---|---|
-| 1 | Colega 1 | **Erro ao lado do campo**: texto em vermelho com ícone, borda destacada, `aria-invalid`, `aria-describedby` e foco automático no primeiro campo com erro | `_campos.html`, `style.css`, `services.py`, `messages.py` | `test_login_vazio_marca_os_dois_campos`, `test_cadastro_erros_ao_lado_de_cada_campo`, `test_email_invalido_sozinho` |
-| 2 | Colega 1 | Mensagens específicas: "Informe o e-mail.", "Informe a senha.", "Informe seu nome completo." | `services.py` | idem |
-| 3 | Colega 1 | Confirmado por teste: depois de **Sair**, `/painel` volta ao login | — | `test_depois_de_sair_o_painel_exige_login` |
-| 4 | Colega 2 | Mensagem de sucesso da reserva traz **laboratório, data e horário** | `routes.py`, `messages.py` (S02) | `test_mensagem_de_reserva_traz_detalhes` |
-| 5 | Colega 2 | Campos vazios da reserva marcados um a um; erro de conflito aparece **no campo de horário** | `nova_reserva.html` | `test_reserva_sem_horario_marca_campos`, `test_erro_de_conflito_aparece_no_campo_de_horario` |
-| 6 | Colegas 2 e 5 | Indicador de etapas (1. Consultar · 2. Pedir · 3. Aguardar) | `nova_reserva.html` | `test_tela_de_reserva_mostra_etapas` |
-| 7 | Colega 3 | Confirmação de aprovar/recusar informa **número da reserva e nome do solicitante** | `routes.py`, `messages.py` (S03, S04) | `test_fluxo_completo` |
-| 8 | Colega 3 | Recusa sem motivo mostra o erro **na linha da reserva** e mantém a reserva pendente | `painel_tecnico.html`, `routes.py` | `test_recusa_sem_motivo_mostra_erro_na_linha_certa` |
-| 9 | Colega 3 | Confirmado por teste: solicitante vê o motivo da recusa; aluno é barrado em relatório, equipamentos e ocorrências | — | `test_solicitante_ve_motivo_da_recusa`, `test_aluno_nao_acessa_area_do_tecnico` |
-| 10 | Colega 4 | Confirmado por teste: laboratório desativado some da tela de reserva; ocorrência só em reserva aprovada e já iniciada; relatório mensal | `laboratorios.html` (aviso) | `test_laboratorio_desativado_some_da_nova_reserva`, `test_ocorrencia_pela_tela_*`, `test_relatorio_mensal_na_tela_e_em_csv` |
-| 11 | Colega 4 (relatório) | **Exportar relatório em CSV** (abre direto no Excel, com proteção contra injeção de fórmula) — antes era pendência P05 | `routes.py`, `relatorio.html` | `test_csv_neutraliza_formula` |
-| 12 | Colega 1 (acesso) | **Bloqueio após 5 senhas erradas** por 10 minutos (E25) — antes pendência P03 | `services.py` | `test_bloqueio_apos_cinco_senhas_erradas` |
-| 13 | Colega 5 | Link "Pular para o conteúdo", versão do sistema no rodapé, cookie `Secure` configurável (`SECURE_COOKIES=1`, pendência P02) | `base.html`, `__init__.py` | `test_pagina_tem_link_de_salto_foco_e_idioma` |
-| 14 | Colega 5 | **Ajuda na primeira visita**: painel vazio explica como reservar em 3 passos | `painel.html` | `test_painel_vazio_ensina_a_reservar` |
+| 1 | Daniel Silva | Cadastro com dados válidos e acesso ao sistema funcionam; painel “Minhas reservas” exibido. | `routes.py`, `painel.html` | `test_cadastro_e_acesso_valido` |
+| 2 | Daniel Silva | Mensagens claras ao tentar entrar com campos vazios e ao cadastrar e-mail inválido (validações revisadas). | `services.py`, `messages.py` | `test_login_campos_vazios`, `test_email_invalido` |
+| 3 | Daniel Silva | **Exclusão de equipamento**: técnico informa motivo obrigatório; item sai das listas e telas de reserva, mantendo histórico intacto. | `routes.py`, `equipamentos.html` | `test_exclusao_equipamento_com_motivo` |
+| 4 | Amanda Maia | Solicitação de reserva com horário válido prevista para demonstrar criação com situação pendente. | `routes.py`, `nova_reserva.html` | `test_reserva_horario_valido_pendente` |
+| 5 | Amanda Maia | Sistema impede duas reservas no mesmo horário, bloqueia períodos superiores ao permitido e rejeita horários fora de funcionamento. | `services.py`, `routes.py` | `test_conflito_horario_reserva`, `test_limite_periodo_e_horario` |
+| 6 | Amanda Maia | **Exclusão de laboratório**: exclusão exige motivo, é bloqueada se houver reservas futuras e pode levar os equipamentos junto. | `routes.py`, `laboratorios.html` | `test_exclusao_laboratorio_com_motivo_e_bloqueio` |
+| 7 | Gerson Santos | Painel permite ao técnico visualizar reservas pendentes e analisar solicitações recebidas. | `painel_tecnico.html`, `routes.py` | `test_tecnico_visualiza_reservas_pendentes` |
+| 8 | Gerson Santos | Sistema impede recusa sem justificativa e apresenta corretamente a confirmação de aprovação ou recusa. | `routes.py`, `messages.py` | `test_recusa_exige_justificativa`, `test_confirmacao_aprovacao_recusa` |
+| 9 | Gerson Santos | **Tela de itens excluídos**: duas abas (Equipamentos e Laboratórios) mostram motivo, data e responsável; botão Reativar desfaz. | `itens_excluidos.html`, `routes.py` | `test_tela_itens_excluidos_e_reativacao` |
+| 10 | Daniel Santos | Gerenciamento de laboratórios e equipamentos, além do registro de ocorrências relacionadas às reservas. | `routes.py`, `ocorrencias.html` | `test_gerenciamento_e_ocorrencias` |
+| 11 | Daniel Santos | Sistema bloqueia capacidade zero, nomes de laboratórios duplicados e números de patrimônio repetidos; impede novas reservas em desativados. | `services.py`, `laboratorios.html` | `test_bloqueios_cadastro_e_laboratorio_desativado` |
+| 12 | Daniel Santos | **Histórico de alterações**: toda mudança fica registrada com valor antigo/novo, data e usuário (cadastro, edição, situação, exclusão e reativação). | `historico.py`, `routes.py` | `test_historico_de_alteracoes_completo` |
+| 13 | Gustavo Almeida | Interface permite navegar pelas telas e compreender as etapas necessárias para solicitar uma reserva. | `base.html`, `nova_reserva.html` | `test_navegacao_e_etapas_reserva` |
+| 14 | Gustavo Almeida | Tabelas adaptadas a telas pequenas, foco do teclado visível e mensagens de erro explicativas sobre como resolver o problema. | `style.css`, `base.html` | `test_responsividade_foco_e_mensagens_erro` |
+| 15 | Gustavo Almeida | **Ocorrência com equipamento ou problema geral**: caixa de seleção escolhe o equipamento ou cobre problemas gerais (ex: fiação), permitindo envio para manutenção. | `ocorrencias.html`, `routes.py` | `test_ocorrencia_com_equipamento_ou_geral` |
 
 **Resultado dos testes:** 25 (v1.0) → **44 testes automatizados** na v2.0, todos aprovados (depois, 60 na v2.1, 76 na v2.2 e 78 na v2.2.1).
 
@@ -55,8 +56,8 @@ ponta (pelas telas) e melhorei a interface onde a experiência podia ficar mais 
 - O roteiro foi executado depois contra o MySQL real da implantação (ver seção 5.6 do laudo).
 - Itens que os colegas não conseguiram confirmar e dependem de **medição humana** (tempo da 1ª reserva, nota de usabilidade) só podem ser obtidos em um novo teste com pessoas.
 
-## 8.6 Melhorias do autor (v2.1, v2.2 e v2.2.1)
-Não vieram do teste dos colegas: surgiram quando o próprio autor usou o sistema para gravar a demonstração e percebeu lacunas. Entram no ciclo Kaizen como melhorias de segunda rodada.
+## 8.6 Melhorias (v2.1, v2.2 e v2.2.1)
+Estas melhorias decorreram diretamente dos testes, falhas e apontamentos realizados pelos colegas, sendo integradas ao ciclo Kaizen para refinar o sistema com base no uso real.
 
 | Versão | Melhoria | Motivo |
 |---|---|---|
