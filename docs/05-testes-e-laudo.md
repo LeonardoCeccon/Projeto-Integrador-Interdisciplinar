@@ -9,6 +9,8 @@ Saída registrada em `docs/evidencias/execucao_testes.txt` — **78 testes, 0 fa
 | Usuários | hash de senha, e-mail normalizado, bloqueio de perfil técnico no cadastro, validações E01–E06 |
 | Reservas | data passada, fim ≤ início, 4 h exatas × 4 h + 1, bordas 07:00/22:00, sobreposição parcial/total, horários encostados, laboratório distinto, liberação por cancelamento/recusa, equipamento em manutenção, *rollback* de gravação parcial, decisão, cancelamento por não dono |
 | Administração | validações de laboratório/equipamento, ocorrência, relatório de horas |
+| Exclusão lógica (v2.1) | motivo obrigatório, bloqueio com reservas futuras, itens fora das listas e da reserva, histórico preservado, reativação, acesso só do técnico (`TestExclusaoV21`, 16 testes) |
+| Histórico, edição, ocorrências e filtros (v2.2 e v2.2.1) | edição de equipamento, histórico de alterações, ocorrência ligada ao equipamento e à manutenção, ocorrência geral do laboratório, filtros de reservas e equipamentos (`TestV22` e 2 testes da v2.2.1) |
 | HTTP | login inválido (401), POST sem CSRF, fluxo professor → técnico, mensagem de conflito (400), escape de HTML (XSS) |
 
 > **Observação:** os testes automatizados rodam com SQLite (`database/schema_sqlite.sql`), que espelha as tabelas e regras.
@@ -27,6 +29,12 @@ Saída registrada em `docs/evidencias/execucao_testes.txt` — **78 testes, 0 fa
 | 8 | Tentar abrir `/relatorio` como aluno | Mensagem E17 |
 | 9 | Colocar equipamento em manutenção e tentar reservá-lo | Não aparece na lista |
 | 10 | Abrir no celular (ou janela estreita) | Tabelas viram cartões |
+| 11 | (v2.1) Como técnico, excluir um equipamento sem motivo e depois com motivo | Mensagem E26; depois S10 e o item some da lista |
+| 12 | (v2.1) Abrir Itens excluídos e reativar | Mensagem S12; o item volta à lista |
+| 13 | (v2.1) Excluir um laboratório que tem reserva futura | Mensagem E27 |
+| 14 | (v2.2) Editar um equipamento com patrimônio já existente | Mensagem E21; com dado válido, S14 |
+| 15 | (v2.2) Abrir Histórico | Linhas de cadastro, edição, exclusão e reativação |
+| 16 | (v2.2.1) Registrar ocorrência escolhendo um equipamento e marcando manutenção; depois outra com "Problema geral do laboratório" | S15 e situação Em manutenção; no histórico, "Geral do laboratório" |
 
 ## 5.3 Registro de testes com colegas
 As respostas dos 5 colegas foram transcritas, como recebidas, na tabela do documento Word de entrega e analisadas em [08-feedback-e-versao-2.md](08-feedback-e-versao-2.md).

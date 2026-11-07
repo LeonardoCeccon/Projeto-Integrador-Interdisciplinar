@@ -11,7 +11,8 @@
 | Laboratório possui Equipamento | 1:N | Equipamento pertence a um único laboratório |
 | Reserva utiliza Equipamento | N:N | Resolvida por `reserva_equipamento` |
 | Reserva gera Ocorrência | 1:N | Ocorrência não existe sem reserva |
-| Equipamento citado em Ocorrência | 1:N opcional | Nem toda ocorrência envolve um equipamento |
+| Equipamento citado em Ocorrência | 1:N opcional | Nem toda ocorrência envolve um equipamento (a v2.2.1 oferece "Problema geral do laboratório") |
+| Usuário registra Histórico de alteração | 1:N opcional | Quem cadastrou, editou, excluiu ou reativou (v2.2) |
 
 ## 4.2 Projeto lógico e normalização
 Ponto de partida (tabela única, como uma planilha):
@@ -34,12 +35,16 @@ Resultado (chaves primárias sublinhadas por `PK`, estrangeiras por `FK`):
 
 ```
 usuario(PK id_usuario, nome, email UK, senha_hash, perfil, ativo, criado_em)
-laboratorio(PK id_laboratorio, nome UK, localizacao, capacidade, ativo)
-equipamento(PK id_equipamento, FK id_laboratorio, nome, numero_patrimonio UK, status)
+laboratorio(PK id_laboratorio, nome UK, localizacao, capacidade, ativo,
+            excluido, excluido_em, FK excluido_por, motivo_exclusao)
+equipamento(PK id_equipamento, FK id_laboratorio, nome, numero_patrimonio UK, status,
+            excluido, excluido_em, FK excluido_por, motivo_exclusao)
 reserva(PK id_reserva, FK id_usuario, FK id_laboratorio, FK id_avaliador, data_reserva,
         hora_inicio, hora_fim, finalidade, status, motivo_recusa, criada_em)
 reserva_equipamento(PK/FK id_reserva, PK/FK id_equipamento)
 ocorrencia(PK id_ocorrencia, FK id_reserva, FK id_equipamento, descricao, registrada_em)
+historico_alteracao(PK id_historico, entidade, id_entidade, referencia, acao, detalhe,
+                    FK id_usuario, registrado_em)
 ```
 Todas as tabelas estão em 3FN: nenhum atributo não-chave depende de outro atributo não-chave.
 
@@ -47,6 +52,8 @@ Todas as tabelas estão em 3FN: nenhum atributo não-chave depende de outro atri
 - `status` e `perfil` como `ENUM` (conjunto pequeno e estável).
 - `motivo_recusa` e `id_avaliador` aceitam `NULL` (só existem após a decisão).
 - Exclusão física é evitada: laboratórios e usuários são **desativados** (`ativo = 0`), preservando o histórico.
+- **Exclusão lógica (v2.1):** laboratórios e equipamentos excluídos recebem `excluido = 1`, data, responsável e motivo. O nome do laboratório e o patrimônio continuam únicos mesmo entre os excluídos, e as consultas de histórico usam JOIN, então reservas e ocorrências antigas continuam completas.
+- **Histórico de alterações (v2.2):** `historico_alteracao` guarda uma linha por mudança, com o nome do item na época (`referencia`), a ação e o detalhe (valor antigo e novo). A tabela não tem chave estrangeira para o item, para o registro sobreviver a qualquer mudança.
 - Chaves substitutas (`INT AUTO_INCREMENT`) nas tabelas principais; patrimônio e e-mail ficam como únicos.
 
 ## 4.3 Projeto físico
@@ -62,6 +69,8 @@ Destaques:
 | Índice `idx_reserva_lab_data (id_laboratorio, data_reserva, hora_inicio)` | Consulta de conflito (RN05) |
 | Índices em `id_usuario`, `status` e `id_equipamento` | Listagens do painel e relatórios |
 | Visão `vw_uso_laboratorio` | Base para relatórios gerenciais direto no SGBD |
+| `CHECK (excluido IN (0,1))` e FK `excluido_por` | Integridade da exclusão lógica (v2.1) |
+| Índices `idx_historico_entidade` e `idx_historico_data` | Consultas do histórico por item e por data (v2.2) |
 | Usuário `labagenda_app` com `SELECT, INSERT, UPDATE` | Mínimo privilégio (RNF03) |
 
 **Por que MySQL?** É um dos SGBD relacionais mais usados do mercado, gratuito, com ampla documentação,
@@ -79,6 +88,13 @@ python -m app.seed                          # usuários de demonstração (senha
 python database/aplicar_schema.py database/schema.sql   # ignora comandos não permitidos
 python -m app.seed
 ```
+
+**Banco já criado antes da v2.1 (como o do Aiven):** aplique as migrações na ordem, antes de publicar a nova versão do código:
+```powershell
+python database/aplicar_schema.py database/migracao_2_1.sql   # colunas de exclusão lógica
+python database/aplicar_schema.py database/migracao_2_2.sql   # tabela historico_alteracao
+```
+Um banco novo já nasce completo com `schema.sql` (ou `schema_hospedado.sql` em nuvem).
 
 ### Rotina de backup sugerida
 ```bash
@@ -103,6 +119,15 @@ SELECT laboratorio, SUM(horas_uso) AS horas
 FROM vw_uso_laboratorio
 WHERE data_reserva BETWEEN '2026-11-01' AND '2026-11-30'
 GROUP BY laboratorio ORDER BY horas DESC;
+
+-- Itens excluídos, com motivo e responsável (v2.1)
+SELECT e.nome, e.numero_patrimonio, e.motivo_exclusao, e.excluido_em, u.nome AS excluido_por
+FROM equipamento e LEFT JOIN usuario u ON u.id_usuario = e.excluido_por
+WHERE e.excluido = 1;
+
+-- Últimas alterações (v2.2)
+SELECT registrado_em, entidade, referencia, acao, detalhe
+FROM historico_alteracao ORDER BY registrado_em DESC LIMIT 20;
 
 -- Equipamentos com mais ocorrências
 SELECT e.nome, COUNT(*) AS total

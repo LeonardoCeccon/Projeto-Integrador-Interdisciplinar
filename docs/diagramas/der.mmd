@@ -7,6 +7,7 @@ erDiagram
   EQUIPAMENTO ||--o{ RESERVA_EQUIPAMENTO : "é usado em"
   RESERVA ||--o{ OCORRENCIA : gera
   EQUIPAMENTO |o--o{ OCORRENCIA : "é citado em"
+  USUARIO |o--o{ HISTORICO_ALTERACAO : registra
   USUARIO {
     int id_usuario PK
     varchar nome
@@ -22,6 +23,10 @@ erDiagram
     varchar localizacao
     smallint capacidade
     tinyint ativo
+    tinyint excluido
+    datetime excluido_em
+    int excluido_por FK
+    varchar motivo_exclusao
   }
   EQUIPAMENTO {
     int id_equipamento PK
@@ -29,6 +34,10 @@ erDiagram
     varchar nome
     varchar numero_patrimonio UK
     enum status
+    tinyint excluido
+    datetime excluido_em
+    int excluido_por FK
+    varchar motivo_exclusao
   }
   RESERVA {
     int id_reserva PK
@@ -53,4 +62,14 @@ erDiagram
     int id_equipamento FK
     varchar descricao
     datetime registrada_em
+  }
+  HISTORICO_ALTERACAO {
+    int id_historico PK
+    enum entidade
+    int id_entidade
+    varchar referencia
+    varchar acao
+    varchar detalhe
+    int id_usuario FK
+    datetime registrado_em
   }

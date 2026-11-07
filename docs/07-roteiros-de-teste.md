@@ -70,6 +70,23 @@ Cada colega recebe um roteiro. Preencha **Resultado obtido** com o que realmente
 | 4 | Cronometrar uma primeira reserva sem ajuda | Registrar o tempo |  |  |
 | 5 | Dar nota de 1 a 5 para clareza das telas | Registrar nota e comentário |  |  |
 
+## Roteiro 6 – Versões 2.1 a 2.2.1 (técnico)
+Para repetir o teste depois das melhorias do autor. Os Roteiros 1 a 5 foram executados pelos colegas na v1.0; este ainda não foi executado por eles.
+
+**Nome do colega:** ____________  **Data do teste:** ____/____/______
+
+| # | Passo | Resultado esperado | Resultado obtido (OK / Falhou / Não testei) | Observações |
+|---|---|---|---|---|
+| 1 | Excluir um equipamento sem informar motivo | Mensagem E26 |  |  |
+| 2 | Excluir com motivo e abrir Itens excluídos | Item com motivo, data e responsável |  |  |
+| 3 | Reativar o item | Volta à lista de equipamentos (S12) |  |  |
+| 4 | Tentar excluir um laboratório com reserva futura | Mensagem E27 |  |  |
+| 5 | Editar um equipamento para um patrimônio já existente | Mensagem E21 |  |  |
+| 6 | Abrir Histórico | Mudanças com valor antigo e novo |  |  |
+| 7 | Registrar ocorrência escolhendo um equipamento e marcando manutenção | Mensagem S15 |  |  |
+| 8 | Registrar ocorrência como "Problema geral do laboratório" | Aparece como "Geral do laboratório" |  |  |
+| 9 | Filtrar Reservas por situação e por solicitante | Só as reservas correspondentes |  |  |
+
 ## Mensagem para enviar aos colegas
 > Oi! Estou finalizando meu Projeto Integrador (sistema de reserva de laboratórios). Você pode testar por uns 10 minutos?
 > Link: [colar link da aplicação]. Usuários de teste e roteiro: [colar roteiro]. Anote o que funcionou, o que quebrou e o que ficou confuso. Vou citar seu nome e seu feedback no trabalho, tudo bem?

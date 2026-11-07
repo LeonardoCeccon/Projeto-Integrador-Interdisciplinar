@@ -8,7 +8,8 @@
 Projeto-Integrador-Interdisciplinar/
 ├── README.md · CHANGELOG.md · requirements.txt · .gitignore · .env.example
 ├── app/                 código Flask (rotas, serviços, acesso a dados, templates, CSS)
-├── database/            schema.sql (MySQL), seed.sql, schema_sqlite.sql (testes),
+├── database/            schema.sql (MySQL), schema_hospedado.sql, seed.sql, schema_sqlite.sql (testes),
+│                        migracao_2_1.sql e migracao_2_2.sql (bancos já existentes),
 │                        aplicar_schema.py, ca.pem (certificado público do Aiven), dicionario_dados.md
 ├── docs/                escopo, UML, IHC, dados, testes/laudo, implantação, imagens e fontes dos diagramas
 └── tests/               78 testes automatizados
@@ -84,7 +85,7 @@ O código vem do **GitHub** e é publicado automaticamente.
 ### Banco de dados (Aiven)
 1. Serviço **MySQL** no plano **Free**, banco `defaultdb`, usuário administrador `avnadmin`.
 2. Anotados host, porta (diferente de 3306), usuário, senha e o certificado **CA** (`ca.pem`, salvo em `database/ca.pem`).
-3. Tabelas criadas a partir do computador com `database/aplicar_schema.py` (13 comandos: 6 tabelas, 6 índices e 1 visão).
+3. Tabelas criadas a partir do computador com `database/aplicar_schema.py` (na implantação da v2.0: 13 comandos, 6 tabelas, 6 índices e 1 visão). As versões 2.1 e 2.2 acrescentaram colunas e a tabela `historico_alteracao` por migração (veja "Como publicar uma nova versão").
 4. Carga inicial com `python -m app.seed` (3 laboratórios, 6 equipamentos, 3 usuários).
 
 ### Aplicação (Render)
@@ -92,6 +93,15 @@ O código vem do **GitHub** e é publicado automaticamente.
 2. **Build Command:** `pip install -r requirements.txt` · **Start Command:** `gunicorn "app:create_app()"`.
 3. Variáveis da seção 6.4 cadastradas em **Environment**; depois, **Manual Deploy → Deploy latest commit**.
 4. URL pública: https://projeto-integrador-interdisciplinar.onrender.com
+
+### Como publicar uma nova versão
+Quando a versão muda o banco (como a 2.1 e a 2.2), a ordem importa: **primeiro o banco, depois o código.**
+1. Definir as variáveis `DB_*` e `DB_SSL_CA` no terminal (nunca no código).
+2. Aplicar as migrações que faltam, na ordem: `python database/aplicar_schema.py database/migracao_2_1.sql` e depois `migracao_2_2.sql`.
+3. `git add`, `git commit`, `git push`. O Render publica sozinho.
+4. Conferir no site o rodapé com a versão (v2.2.1) e abrir as telas novas (Itens excluídos, Histórico, Reservas).
+
+Se o código novo subir antes da migração, as telas novas falham por falta de coluna ou tabela.
 
 ### Problemas encontrados e como foram resolvidos
 | Sintoma nos Logs | Causa | Solução |

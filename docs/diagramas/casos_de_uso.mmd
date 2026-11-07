@@ -16,10 +16,14 @@ flowchart LR
     UC8((UC08 Gerir<br/>laboratórios))
     UC9((UC09 Gerir<br/>equipamentos))
     UC10((UC10 Registrar<br/>ocorrência))
-    UC11((UC11 Emitir relatório<br/>de uso))
+    UC11((UC11 Emitir relatório<br/>de uso e CSV))
+    UC12((UC12 Excluir e reativar<br/>laboratórios e equipamentos))
+    UC13((UC13 Editar<br/>equipamento))
+    UC14((UC14 Consultar<br/>histórico))
+    UC15((UC15 Consultar reservas<br/>com filtros))
   end
   S --- UC1 & UC3 & UC4 & UC5 & UC6
-  T --- UC7 & UC8 & UC9 & UC10 & UC11
+  T --- UC7 & UC8 & UC9 & UC10 & UC11 & UC12 & UC13 & UC14 & UC15
   UC4 -. "«include»" .-> UC3
   UC4 -. "«include»" .-> UC2
   UC7 -. "«include»" .-> UC2

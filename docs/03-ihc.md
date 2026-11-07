@@ -8,7 +8,7 @@ Heurísticas de Nielsen aplicadas ao LabAgenda:
 | Visibilidade do estado do sistema | Situação da reserva em etiquetas coloridas **com texto**; mensagens de sucesso após cada ação |
 | Correspondência com o mundo real | Vocabulário do dia a dia: "reserva", "laboratório", "aprovar" |
 | Controle e liberdade | Botões "Cancelar" e "Voltar" em formulários; cancelamento de reserva |
-| Consistência | Mesma barra de navegação, mesmos botões e catálogo único de mensagens |
+| Consistência | Mesma barra de navegação, mesmos botões e catálogo único de mensagens (46 mensagens, E01–E31 e S01–S15) |
 | Prevenção de erros | Campos `time`/`date` nativos, lista só com equipamentos disponíveis, quadro de horários ocupados antes do pedido |
 | Reconhecimento em vez de memorização | O quadro amarelo mostra o que está ocupado; os rótulos ficam sempre visíveis (sem *placeholder* como rótulo) |
 | Eficiência de uso | Consulta e pedido na mesma tela; painel do técnico decide sem abrir outra página |
@@ -30,10 +30,13 @@ Login ──► Painel do solicitante ──► Nova reserva ──► (volta ao
   └─► Criar conta
 
 Login ──► Painel do técnico (pendentes)
-              ├──► Laboratórios (edição)
-              ├──► Equipamentos
-              ├──► Ocorrências
-              └──► Relatório de uso
+              ├──► Reservas (filtros)                         v2.2
+              ├──► Laboratórios (edição, exclusão)            v2.1
+              ├──► Equipamentos (filtros, edição, exclusão)   v2.1 e v2.2
+              ├──► Itens excluídos (abas, reativação)         v2.1
+              ├──► Histórico de alterações                    v2.2
+              ├──► Ocorrências (equipamento ou problema geral) v2.2
+              └──► Relatório de uso (tela e CSV)
 ```
 
 ## 3.4 Catálogo de mensagens
@@ -52,7 +55,6 @@ próximo passo. Erros usam fundo vermelho-claro e `role="alert"`; sucessos, fund
 | E08 | Fim ≤ início | O horário final deve ser depois do horário inicial. |
 | E09 | Mais de 4 h | Cada reserva pode durar no máximo 4 horas. |
 | E10 | Fora do expediente | O laboratório funciona das 07:00 às 22:00. Escolha um horário dentro desse período. |
-| E25 | Excesso de tentativas de login | Muitas tentativas de acesso. Aguarde 10 minutos e tente de novo. |
 | E11 | Conflito | Este laboratório já está reservado em parte desse horário. Consulte os horários já ocupados no quadro amarelo acima. |
 | E12 | Equipamento indisponível | O equipamento '{nome}' não está livre nesse horário. |
 | E13 | Laboratório desativado | Este laboratório está desativado e não aceita reservas. |
@@ -62,7 +64,15 @@ próximo passo. Erros usam fundo vermelho-claro e `role="alert"`; sucessos, fund
 | E17 | Sem permissão | Você não tem permissão para acessar esta página. |
 | E18 | Registro inexistente | Registro não encontrado. |
 | E19–E24 | Cadastros e datas | Ver arquivo (capacidade, nome duplicado, patrimônio duplicado, ocorrência, sessão expirada, data inválida) |
+| E25 | Excesso de tentativas de login (v2.0) | Muitas tentativas de acesso. Aguarde 10 minutos e tente de novo. |
+| E26 | Exclusão sem motivo (v2.1) | Informe o motivo da exclusão (mínimo de 5 caracteres). |
+| E27 | Laboratório com reservas futuras (v2.1) | O laboratório tem {n} reserva(s) futura(s) pendente(s) ou aprovada(s). Cancele ou recuse essas reservas antes de excluir. |
+| E28 | Equipamento com reservas futuras (v2.1) | O equipamento tem {n} reserva(s) futura(s) pendente(s) ou aprovada(s). Cancele ou recuse essas reservas antes de excluir. |
+| E29 | Reativar equipamento de laboratório excluído (v2.1) | O laboratório deste equipamento está excluído. Reative o laboratório antes. |
+| E30 | Trocar o laboratório de um equipamento com reservas futuras (v2.2) | O equipamento tem {n} reserva(s) futura(s) pendente(s) ou aprovada(s) e não pode mudar de laboratório agora. |
+| E31 | Manutenção sem equipamento escolhido (v2.2) | Escolha o equipamento para colocá-lo em manutenção. |
 | S01–S09 | Sucessos | Ex. (v2.0): "Reserva enviada! Laboratório de Redes, 25/10/2026 das 08:00 às 10:00. Ela aguarda a aprovação do técnico." |
+| S10–S15 | Sucessos da v2.1 e v2.2 | Equipamento ou laboratório excluído (S10, S11) e reativado (S12, S13); equipamento atualizado (S14); "Ocorrência registrada. O equipamento '{nome}' foi colocado em manutenção." (S15) |
 
 ## 3.5 Protótipo implementado (capturas reais)
 | Tela | Imagem | Observações de projeto |
@@ -79,6 +89,13 @@ próximo passo. Erros usam fundo vermelho-claro e `role="alert"`; sucessos, fund
 | Equipamentos | ![](img/tela10_equipamentos.png) | Troca de situação por lista |
 | Relatório | ![](img/tela11_relatorio.png) | Filtro por período |
 | Celular | ![](img/tela12_mobile_reservas.png) | Tabela vira cartões |
+| Excluir equipamento (v2.1) | ![](img/tela17_excluir_equipamento.png) | Motivo obrigatório antes de excluir |
+| Itens excluídos (v2.1) | ![](img/tela18_itens_excluidos.png) | Abas Equipamentos e Laboratórios; motivo, data, responsável e botão Reativar |
+| Editar equipamento (v2.2) | ![](img/tela19_editar_equipamento.png) | Nome, patrimônio e laboratório |
+| Histórico (v2.2) | ![](img/tela20_historico.png) | Quem fez o quê, com busca e filtro por tipo |
+| Reservas com filtros (v2.2) | ![](img/tela21_reservas_filtros.png) | Laboratório, situação, período e texto |
+| Ocorrência com equipamento (v2.2) | ![](img/tela22_ocorrencia_equipamento.png) | Caixa "O que foi afetado?" e opção de manutenção |
+| Ocorrências registradas (v2.2.1) | ![](img/tela23_ocorrencias_historico.png) | Equipamento citado ou "Geral do laboratório" |
 
 ## 3.6 Melhorias de IHC registradas no ciclo Kaizen
 1. Mensagem E11 reescrita para apontar o quadro que realmente existe na tela.
@@ -96,7 +113,16 @@ próximo passo. Erros usam fundo vermelho-claro e `role="alert"`; sucessos, fund
 
 Capturas: `tela13` a `tela16` em `docs/img/` (ver [08-feedback-e-versao-2.md](08-feedback-e-versao-2.md)).
 
-## 3.8 Pontos a validar com colegas (roteiro de avaliação heurística)
+## 3.8 Melhorias de IHC da v2.1 a v2.2.1 (definidas pelo autor)
+1. **Controle e liberdade:** itens excluídos podem ser reativados; nada é apagado de verdade.
+2. **Prevenção de erros:** exclusão exige motivo e é bloqueada quando há reservas futuras, com a quantidade na mensagem (E27, E28).
+3. **Visibilidade do estado do sistema:** o histórico mostra quem fez o quê, com data e o valor antigo e o novo.
+4. **Correspondência com o mundo real:** a ocorrência pergunta "O que foi afetado?", com a opção "Problema geral do laboratório" para fiação, ar-condicionado ou iluminação.
+5. **Eficiência de uso:** filtros e busca nas listas do técnico (reservas, equipamentos, histórico).
+
+Capturas: `tela17` a `tela23` em `docs/img/`.
+
+## 3.9 Pontos a validar com colegas (roteiro de avaliação heurística)
 - A pessoa consegue fazer uma reserva sem instrução? Quanto tempo leva?
 - Entende por que o pedido foi recusado?
 - O quadro de horários ocupados é percebido antes de errar o horário?

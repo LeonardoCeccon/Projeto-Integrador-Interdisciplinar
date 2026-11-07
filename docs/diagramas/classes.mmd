@@ -16,6 +16,8 @@ classDiagram
     -String localizacao
     -int capacidade
     -boolean ativo
+    -boolean excluido
+    -String motivoExclusao
     +estaLivre(data, inicio, fim) boolean
   }
   class Equipamento {
@@ -23,7 +25,11 @@ classDiagram
     -String nome
     -String numeroPatrimonio
     -StatusEquipamento status
+    -boolean excluido
+    -String motivoExclusao
     +estaDisponivel() boolean
+    +excluir(tecnico, motivo)
+    +reativar(tecnico)
   }
   class Reserva {
     -int idReserva
@@ -43,6 +49,14 @@ classDiagram
     -int idOcorrencia
     -String descricao
     -DateTime registradaEm
+  }
+  class HistoricoAlteracao {
+    -int idHistorico
+    -Entidade entidade
+    -String referencia
+    -String acao
+    -String detalhe
+    -DateTime registradoEm
   }
   class Perfil {
     <<enumeration>>
@@ -70,6 +84,7 @@ classDiagram
   Reserva "0..*" -- "0..*" Equipamento : utiliza
   Reserva "1" *-- "0..*" Ocorrencia : gera
   Ocorrencia "0..*" --> "0..1" Equipamento : refere-se a
+  HistoricoAlteracao "0..*" --> "0..1" Usuario : feita por
   Usuario --> Perfil
   Reserva --> StatusReserva
   Equipamento --> StatusEquipamento

@@ -20,7 +20,7 @@ pedido; o sistema impede conflitos por regra, não por boa vontade.
 4. Produzir um relatório de horas de uso por laboratório para apoiar decisões de manutenção e compra.
 
 ## 1.3 Escopo
-| Dentro do escopo (versões 1.0 e 2.0) | Fora do escopo (backlog) |
+| Dentro do escopo (versões 1.0 a 2.2.1) | Fora do escopo (backlog) |
 |---|---|
 | Cadastro e login de alunos/professores | Integração com o sistema acadêmico (SSO) |
 | Consulta de horários ocupados por data | Reservas recorrentes (semanais) |
@@ -28,7 +28,10 @@ pedido; o sistema impede conflitos por regra, não por boa vontade.
 | Aprovação/recusa com motivo pelo técnico | Aplicativo móvel nativo (a interface web já é responsiva) |
 | Cadastro de laboratórios e equipamentos, com situação | Calendário visual semanal |
 | Registro de ocorrências | Exportação do relatório em PDF (o CSV entrou na v2.0) |
-| Relatório de uso por período | Recuperação de senha por e-mail |
+| Relatório de uso por período, com exportação em CSV (v2.0) | Recuperação de senha por e-mail |
+| Exclusão lógica e reativação de laboratórios e equipamentos (v2.1) | |
+| Edição de equipamentos, histórico de alterações e filtros de consulta (v2.2) | |
+| Ocorrências ligadas a um equipamento ou ao laboratório, com envio para manutenção (v2.2 e v2.2.1) | |
 
 ## 1.4 Partes interessadas e perfis
 | Perfil | Quem é | O que precisa fazer |
@@ -52,8 +55,12 @@ manter a separação clara em relação ao técnico.*
 | RF07 | Aprovar ou recusar reservas pendentes (recusa exige motivo) | UC07 |
 | RF08 | Cadastrar, editar, ativar e desativar laboratórios | UC08 |
 | RF09 | Cadastrar equipamentos e alterar sua situação | UC09 |
-| RF10 | Registrar ocorrências ligadas a reservas aprovadas | UC10 |
-| RF11 | Emitir relatório de reservas aprovadas e horas de uso por laboratório | UC11 |
+| RF10 | Registrar ocorrências ligadas a reservas aprovadas, informando o equipamento afetado ou "problema geral do laboratório", com opção de enviar o equipamento para manutenção (v2.2, v2.2.1) | UC10 |
+| RF11 | Emitir relatório de reservas aprovadas e horas de uso por laboratório, na tela e em CSV (v2.0) | UC11 |
+| RF12 | Excluir, com motivo, e reativar laboratórios e equipamentos, consultando os itens excluídos (v2.1) | UC12 |
+| RF13 | Editar nome, patrimônio e laboratório de um equipamento (v2.2) | UC13 |
+| RF14 | Registrar e consultar o histórico de alterações de laboratórios e equipamentos (v2.2) | UC14 |
+| RF15 | Consultar reservas (e equipamentos) com filtros por laboratório, situação, período e texto (v2.2) | UC15 |
 
 ## 1.6 Requisitos não funcionais
 | ID | Requisito | Como é atendido |
@@ -67,6 +74,8 @@ manter a separação clara em relação ao técnico.*
 | RNF07 | Mensagens claras e consistentes | Catálogo único em `app/messages.py` |
 | RNF08 | Disponível na internet com banco gerenciado | Render (aplicação) + MySQL 8 no Aiven, conexão SSL, deploy automático pelo GitHub |
 | RNF09 | Configuração fora do código | Variáveis de ambiente (`DB_*`, `SECRET_KEY`, `SECURE_COOKIES`); credenciais nunca versionadas |
+| RNF10 | Proteção contra tentativas repetidas de senha (v2.0) | Bloqueio por 10 minutos após 5 senhas erradas (E25) |
+| RNF11 | Acessibilidade e clareza nos erros (v2.0) | Erro ao lado do campo com ícone, `aria-invalid` e foco automático; link "Pular para o conteúdo"; foco visível |
 
 ## 1.7 Regras de negócio
 | ID | Regra | Onde é garantida |
@@ -82,20 +91,22 @@ manter a separação clara em relação ao técnico.*
 | RN09 | Ocorrência só em reserva APROVADA cujo horário já começou | serviço |
 | RN10 | Relatório considera apenas reservas APROVADAS | serviço |
 | RN11 (v2.1) | Equipamento ou laboratório é excluído só de forma lógica, com motivo de 5+ caracteres, data e responsável; o histórico (reservas, ocorrências, relatório) é preservado | serviço |
+| RN12 (v2.1) | Não se exclui laboratório ou equipamento com reservas futuras pendentes/aprovadas; item excluído pode ser reativado em Itens excluídos | serviço |
 | RN13 (v2.2) | Cadastro, edição, mudança de situação, exclusão e reativação de laboratórios e equipamentos são registrados (quem, quando e o que mudou) | serviço |
 | RN14 (v2.2) | Equipamento só muda de laboratório se não tiver reservas futuras pendentes/aprovadas; colocar em manutenção por ocorrência exige o equipamento da reserva | serviço |
-| RN12 (v2.1) | Não se exclui laboratório ou equipamento com reservas futuras pendentes/aprovadas; item excluído pode ser reativado em Itens excluídos | serviço |
 
 ## 1.8 Critérios de aceite (resumo)
 - Dado um laboratório com reserva das 08:00 às 10:00, um pedido das 09:00 às 11:00 é rejeitado com a mensagem E11, e um pedido das 10:00 às 11:00 é aceito.
 - Dado um pedido recusado, o solicitante vê o motivo na própria lista.
 - Dado um equipamento em manutenção, ele não aparece na lista de seleção da reserva e é rejeitado se enviado.
-- Um aluno que acessa `/relatorio` é redirecionado com a mensagem E17.
+- Um aluno que acessa `/relatorio`, `/historico` ou `/excluidos` é redirecionado com a mensagem E17.
+- Dado um laboratório com reserva futura aprovada, a tentativa de excluí-lo é recusada com a mensagem E27; sem reservas futuras, a exclusão exige motivo e o item aparece em Itens excluídos, de onde pode ser reativado.
+- Dada uma ocorrência com um equipamento e "colocar em manutenção", o equipamento passa a Em manutenção e a mudança aparece no histórico; sem equipamento, a ocorrência é registrada como "Geral do laboratório".
 
 ## 1.9 Ciclo de melhoria contínua (Kaizen / PDCA)
 > **Nota ao estudante:** como o PIT I não foi anexado, os achados abaixo descrevem falhas comuns de uma primeira modelagem, tratadas já nesta versão. Se o seu PIT I tinha outros pontos, substitua/complete a tabela com a sua realidade e os comentários dos colegas.
 
-O projeto foi tratado como um ciclo PDCA. Cada achado abaixo foi **planejado, feito, verificado e ajustado**.
+O projeto foi tratado como um ciclo PDCA. Cada achado abaixo foi **planejado, feito, verificado e ajustado**. Os achados 1 a 8 são da primeira modelagem (v1.0); 9 a 13 vieram do teste dos cinco colegas (v2.0); 14 a 17 foram identificados pelo próprio autor ao usar o sistema (v2.1 a v2.2.1).
 
 | # | Achado (Plan) | Ação (Do) | Verificação (Check) | Resultado (Act) |
 |---|---|---|---|---|
@@ -107,6 +118,15 @@ O projeto foi tratado como um ciclo PDCA. Cada achado abaixo foi **planejado, fe
 | 6 | Botão "Cancelar" aparecia em reservas já realizadas | Botão só aparece quando a regra RN08 permite | Captura `tela12_mobile_reservas.png` | Interface alinhada à regra |
 | 7 | Falha ao gravar um equipamento deixava a reserva "pela metade" | Operação envolta em transação com `ROLLBACK` | `test_falha_em_equipamento_nao_deixa_reserva_pela_metade` | Gravação tudo-ou-nada |
 | 8 | Mensagens espalhadas pelo código | Catálogo único `app/messages.py` com códigos E/S | Revisão das telas | Textos consistentes e reutilizáveis |
+| 9 | O teste do Colega 1 mostrou que erro de preenchimento aparecia só em um aviso no topo, sem destacar o campo | Erro ao lado do campo (texto, ícone, borda, `aria-invalid`, foco automático) e mensagens específicas | `test_login_vazio_marca_os_dois_campos`, `test_cadastro_erros_ao_lado_de_cada_campo` | v2.0 |
+| 10 | Colega 2: reserva com campos vazios e conflito de horário sem indicar o campo; sucesso sem detalhes | Campos marcados um a um, conflito no campo de horário, mensagem S02 com laboratório, data e horário, indicador de etapas | `test_reserva_sem_horario_marca_campos`, `test_mensagem_de_reserva_traz_detalhes` | v2.0 |
+| 11 | Colega 3: recusa sem motivo e confirmações pouco informativas | Erro na linha da reserva (reserva continua pendente); S03/S04 com número e nome do solicitante | `test_recusa_sem_motivo_mostra_erro_na_linha_certa` | v2.0 |
+| 12 | Colegas 1 e 4: tentativas ilimitadas de senha e relatório sem exportação | Bloqueio após 5 falhas (E25); exportação do relatório em CSV | `test_bloqueio_apos_cinco_senhas_erradas`, `test_csv_neutraliza_formula` | v2.0 |
+| 13 | Colega 5: primeira visita sem orientação e navegação por teclado | Link "Pular para o conteúdo", versão no rodapé e quadro "Como reservar em 3 passos" | `test_pagina_tem_link_de_salto_foco_e_idioma`, `test_painel_vazio_ensina_a_reservar` | v2.0 |
+| 14 | Autor, ao gravar a demonstração: equipamento quebrado ou laboratório desativado ficava para sempre nas listas | Exclusão lógica com motivo, data e responsável; tela Itens excluídos com reativação (RN11, RN12) | classe `TestExclusaoV21` (16 testes) | v2.1 |
+| 15 | Autor: não havia como saber quem mudou o quê, nem corrigir um equipamento sem recadastrar | Histórico de alterações (RN13) e edição de equipamento (RN14) | classe `TestV22` | v2.2 |
+| 16 | Autor: a ocorrência não permitia dizer qual equipamento teve problema nem registrar problemas gerais | Caixa "O que foi afetado?" com os equipamentos da reserva, envio para manutenção e opção "Problema geral do laboratório" | `TestV22`, 2 testes da v2.2.1 | v2.2 e v2.2.1 |
+| 17 | Autor: listas de reservas, equipamentos e histórico crescem com o uso | Filtros e busca para o técnico (RF15) | `TestV22` | v2.2 |
 
 ## 1.10 Riscos
 | Risco | Probabilidade | Impacto | Mitigação |
