@@ -105,6 +105,17 @@ Melhorias definidas pelo autor, sem dependência de serviços externos. 16 teste
 
 Lição registrada: erros de configuração são mais rápidos de diagnosticar pelo **final do Traceback nos Logs** do Render; a primeira linha (`Traceback (most recent call last):`) não traz a causa.
 
+## 5.7 Verificação da versão 2.2.1 (execução do autor)
+**Data:** 06/11/2026 · **Executor:** autor do projeto · **Ambientes:** local (SQLite) e site publicado (Render + MySQL 8 no Aiven)
+
+| Etapa | Verificação | Resultado |
+|---|---|---|
+| 1 | `python -m unittest discover -s tests`: 78 testes | Aprovado |
+| 2 | Checklist manual de 22 passos no ambiente local: erros junto do campo, bloqueio de login, reserva e conflito, recusa sem motivo, exclusão e reativação de equipamento e de laboratório, bloqueio por reserva futura, edição com patrimônio duplicado, histórico, filtros, ocorrência em reserva futura, ocorrência com equipamento e manutenção, ocorrência geral do laboratório, permissões do aluno | Aprovado (22/22) |
+| 3 | Site publicado: rodapé v2.2.1, telas Itens excluídos, Histórico e Reservas abrindo sem erro (migrações 2.1 e 2.2 aplicadas no Aiven) | Aprovado |
+
+Observação: este registro vem da execução do próprio autor. A validação com pessoas independentes continua sendo a dos colegas (seção 5.3 e 5.5).
+
 ### Parecer final
-Regras RN01–RN10 implementadas e cobertas por 44 testes automatizados; defeitos F01–F04, D01–D04 (v1.0/v2.0) e D05–D06 (implantação) corrigidos e retestados; sistema publicado com MySQL real. **Aprovado.**
-Itens que dependem de novo teste com pessoas (tempo da primeira reserva e nota de usabilidade) seguem para a v2.1.
+Regras RN01–RN14 implementadas e cobertas por 78 testes automatizados; defeitos F01–F04, D01–D04 (v1.0/v2.0) e D05–D06 (implantação) corrigidos e retestados; versões 2.1, 2.2 e 2.2.1 verificadas no ambiente local e no site publicado com MySQL real. **Aprovado.**
+Itens que dependem de novo teste com pessoas (tempo da primeira reserva e nota de usabilidade) seguem para o próximo ciclo.
